@@ -1,0 +1,35 @@
+services:
+  mongo:
+    image: docker.io/library/mongo:8.0
+    ports:
+      - "127.0.0.1:27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: dev
+      MONGO_INITDB_ROOT_PASSWORD: dev
+    volumes:
+      - mongo-data:/data/db
+
+  backend:
+    build: .
+    command: bun src/main.ts
+    init: true
+    ports:
+      - "127.0.0.1:3000:3000"
+    environment:
+      MONGODB_URL: mongodb://dev:dev@mongo:27017/novelty?authSource=admin
+    depends_on:
+      - mongo
+
+  frontend:
+    build: .
+    command: bun web/server.ts
+    init: true
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      BACKEND_URL: http://backend:3000
+    depends_on:
+      - backend
+
+volumes:
+  mongo-data:

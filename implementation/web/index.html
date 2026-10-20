@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Novelty</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="module" src="./app.ts"></script>
+  </head>
+  <body>
+    <h1>Novelty</h1>
+    <label>Reader <input id="user" value="jane" /></label>
+
+    <article id="card"></article>
+    <nav>
+      <button id="pass">✕ Pass</button>
+      <button id="like">Up Next ♥</button>
+    </nav>
+    <p id="status"></p>
+
+    <section>
+      <h2>Your shelves</h2>
+      <div id="tabs">
+        <button data-shelf="UP_NEXT" aria-pressed="true">Up Next</button>
+        <button data-shelf="FAVORITES" aria-pressed="false">Favorites</button>
+        <button data-shelf="PASSED" aria-pressed="false">Passed</button>
+      </div>
+      <ul id="shelf"></ul>
+    </section>
+  </body>
+</html>
