@@ -1,20 +1,32 @@
 # Application types
 
-Readers type their own name, and books are identified by a short id until the catalog exists.
-
-```types
-concrete Name
-  The name a reader types in.
-```
+Readers sign in with an account, and the account reference (its username) is the reader
+wherever another concept needs one: as a session's subject, a shelf's owner, a swiper, and the
+user whose tastes are ranked.
 
 ```instances
+instantiate Authenticating
+
+instantiate Sessioning with
+  Subject is Authenticating.Account
+
 instantiate BookCataloging
 
 instantiate Shelving with
-  User is Name
+  User is Authenticating.Account
   Item is BookCataloging.Book
 
 instantiate Swiping with
-  User is Name
+  User is Authenticating.Account
+  Item is BookCataloging.Book
+
+instantiate Recommending with
+  User is Authenticating.Account
+  Item is BookCataloging.Book
+  Feature is BookCataloging.Criterion
+
+instantiate Harvesting
+
+instantiate Drafting with
   Item is BookCataloging.Book
 ```

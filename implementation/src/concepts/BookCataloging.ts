@@ -346,4 +346,26 @@ export class BookCatalogingConcept {
     const c = await this.c.criteria.findOne({ name });
     return c ? [{ criterion: c._id }] : [];
   }
+
+  async _criteria(_input: Record<string, never>) {
+    const rows = await this.c.criteria.find().sort({ name: 1 }).toArray();
+    return rows.map(({ _id, name, description }) => ({
+      criterion: _id,
+      name,
+      description,
+    }));
+  }
+
+  async _pending(_input: Record<string, never>) {
+    const rows = await this.c.books
+      .find({ status: "PENDING" })
+      .sort({ title: 1 })
+      .toArray();
+    return rows.map(({ _id, isbn, title, author }) => ({
+      book: _id,
+      isbn,
+      title,
+      author,
+    }));
+  }
 }

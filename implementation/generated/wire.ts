@@ -14,6 +14,48 @@ export type Json = null | boolean | number | string | Json[] | { [key: string]: 
 export type AppWideError = never;
 
 export type NoveltyWire = {
+  "/auth/current": {
+    input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
+    };
+    output: {
+      "account": Jsonify<AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>>, ["subject"]>>;
+    };
+    error: { error: AppWideError | "INVALID_INPUT" | "UNKNOWN_SESSION" };
+  };
+  "/auth/register": {
+    input: {
+      "password": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Authenticating"]["register"]>[0], ["password"]>>;
+      "username": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Authenticating"]["register"]>[0], ["username"]>>;
+    };
+    output: {
+      "account": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["start"]>[0], ["subject"]>>;
+      "expiresAt": Jsonify<AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Sessioning"]["start"]>>, ["expiresAt"]>>;
+      "session": Jsonify<AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Sessioning"]["start"]>>, ["session"]>>;
+    };
+    error: { error: AppWideError | "INVALID_INPUT" | "INVALID_USERNAME" | "USERNAME_TAKEN" | "WEAK_PASSWORD" };
+  };
+  "/auth/sign-in": {
+    input: {
+      "password": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Authenticating"]["authenticate"]>[0], ["password"]>>;
+      "username": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Authenticating"]["authenticate"]>[0], ["username"]>>;
+    };
+    output: {
+      "account": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["start"]>[0], ["subject"]>>;
+      "expiresAt": Jsonify<AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Sessioning"]["start"]>>, ["expiresAt"]>>;
+      "session": Jsonify<AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Sessioning"]["start"]>>, ["session"]>>;
+    };
+    error: { error: AppWideError | "INVALID_CREDENTIALS" | "INVALID_INPUT" };
+  };
+  "/auth/sign-out": {
+    input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["end"]>[0], ["session"]>>;
+    };
+    output: {
+      "ended": Jsonify<AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Sessioning"]["end"]>>, ["ended"]>>;
+    };
+    error: { error: AppWideError | "INVALID_INPUT" | "UNKNOWN_SESSION" };
+  };
   "/catalog/card": {
     input: {
       "book": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_book"]>[0], ["book"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_characters"]>[0], ["book"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_genres"]>[0], ["book"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_scores"]>[0], ["book"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_themes"]>[0], ["book"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_tones"]>[0], ["book"]>]>>;
@@ -52,6 +94,15 @@ export type NoveltyWire = {
       };
     };
     error: { error: AppWideError | "INVALID_INPUT" };
+  };
+  "/catalog/grow": {
+    input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
+    };
+    output: {
+      "batch": Jsonify<AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Harvesting"]["start"]>>, ["batch"]>>;
+    };
+    error: { error: AppWideError | "ALREADY_DRAFTED" | "BATCH_NOT_RUNNING" | "BATCH_RUNNING" | "BOOK_NOT_DESCRIBED" | "BOOK_NOT_PENDING" | "DRAFT_FAILED" | "INVALID_AGE_RANGE" | "INVALID_INPUT" | "INVALID_SCORE" | "INVALID_SIZE" | "INVALID_VALUE" | "NO_ASPECTS" | "NO_SUCH_CRITERION" | "UNKNOWN_SESSION" };
   };
   "/catalog/list": {
     input: Record<string, never>;
@@ -69,7 +120,7 @@ export type NoveltyWire = {
   };
   "/feed/history": {
     input: {
-      "user": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["_swipes"]>[0], ["user"]>>;
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
     };
     output: {
       "history": {
@@ -79,64 +130,111 @@ export type NoveltyWire = {
         }[];
       };
     };
-    error: { error: AppWideError | "INVALID_INPUT" };
+    error: { error: AppWideError | "INVALID_INPUT" | "UNKNOWN_SESSION" };
   };
   "/feed/like": {
     input: {
-      "item": Jsonify<OneOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["swipeRight"]>[0], ["item"]>, AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["add"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Shelving"]["add"]>>, ["item"]>]>]>>;
-      "user": Jsonify<OneOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["swipeRight"]>[0], ["user"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["add"]>[0], ["user"]>]>>;
+      "item": Jsonify<OneOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["swipeRight"]>[0], ["item"]>, AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["reinforce"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["reinforce"]>>, ["item"]>]>]>>;
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
     };
     output: {
-      "item": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["add"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Shelving"]["add"]>>, ["item"]>]>>;
+      "item": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["reinforce"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["reinforce"]>>, ["item"]>]>>;
     };
-    error: { error: AppWideError | "ALREADY_SHELVED" | "ALREADY_SWIPED" | "INVALID_INPUT" };
+    error: { error: AppWideError | "ALREADY_SHELVED" | "ALREADY_SWIPED" | "INVALID_INPUT" | "UNKNOWN_ITEM" | "UNKNOWN_SESSION" };
   };
   "/feed/pass": {
     input: {
-      "item": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["swipeLeft"]>[0], ["item"]>>;
-      "user": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["swipeLeft"]>[0], ["user"]>>;
+      "item": Jsonify<OneOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["swipeLeft"]>[0], ["item"]>, AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["weaken"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["weaken"]>>, ["item"]>]>]>>;
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
     };
     output: {
-      "item": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["swipeLeft"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Swiping"]["swipeLeft"]>>, ["item"]>]>>;
+      "item": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["weaken"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["weaken"]>>, ["item"]>]>>;
     };
-    error: { error: AppWideError | "ALREADY_SWIPED" | "INVALID_INPUT" };
+    error: { error: AppWideError | "ALREADY_SWIPED" | "INVALID_INPUT" | "UNKNOWN_ITEM" | "UNKNOWN_SESSION" };
+  };
+  "/feed/ranked": {
+    input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
+    };
+    output: {
+      "ranking": {
+        "items": {
+          "fit": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["_ranked"]>>>, ["fit"]>>;
+          "item": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["_ranked"]>>>, ["item"]>>;
+        }[];
+      };
+    };
+    error: { error: AppWideError | "INVALID_INPUT" | "UNKNOWN_SESSION" };
   };
   "/feed/reconsider": {
     input: {
       "item": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["reconsider"]>[0], ["item"]>>;
-      "user": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["reconsider"]>[0], ["user"]>>;
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
     };
     output: {
       "item": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["reconsider"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Swiping"]["reconsider"]>>, ["item"]>]>>;
     };
-    error: { error: AppWideError | "INVALID_INPUT" | "NOT_SWIPED" };
+    error: { error: AppWideError | "INVALID_INPUT" | "NOT_SWIPED" | "UNKNOWN_SESSION" };
+  };
+  "/profile/view": {
+    input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
+    };
+    output: {
+      "criteria": {
+        "criteria": {
+          "criterion": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_criteria"]>>>, ["criterion"]>>;
+          "description": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_criteria"]>>>, ["description"]>>;
+          "name": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_criteria"]>>>, ["name"]>>;
+        }[];
+      };
+      "weights": {
+        "weights": {
+          "criterion": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["_preferences"]>>>, ["feature"]>>;
+          "weight": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["_preferences"]>>>, ["declared"]>>;
+        }[];
+      };
+    };
+    error: { error: AppWideError | "INVALID_INPUT" | "UNKNOWN_SESSION" };
+  };
+  "/profile/weigh": {
+    input: {
+      "criterion": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["declare"]>[0], ["feature"]>>;
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
+      "weight": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["declare"]>[0], ["weight"]>>;
+    };
+    output: {
+      "criterion": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["declare"]>[0], ["feature"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["declare"]>>, ["feature"]>]>>;
+      "weight": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["declare"]>[0], ["weight"]>>;
+    };
+    error: { error: AppWideError | "INVALID_INPUT" | "INVALID_WEIGHT" | "UNKNOWN_SESSION" };
   };
   "/shelves/add": {
     input: {
       "item": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["add"]>[0], ["item"]>>;
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
       "shelf": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["add"]>[0], ["shelf"]>>;
-      "user": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["add"]>[0], ["user"]>>;
     };
     output: {
       "item": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["add"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Shelving"]["add"]>>, ["item"]>]>>;
     };
-    error: { error: AppWideError | "ALREADY_SHELVED" | "INVALID_INPUT" };
+    error: { error: AppWideError | "ALREADY_SHELVED" | "INVALID_INPUT" | "UNKNOWN_SESSION" };
   };
   "/shelves/remove": {
     input: {
       "item": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["remove"]>[0], ["item"]>>;
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
       "shelf": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["remove"]>[0], ["shelf"]>>;
-      "user": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["remove"]>[0], ["user"]>>;
     };
     output: {
       "item": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["remove"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Shelving"]["remove"]>>, ["item"]>]>>;
     };
-    error: { error: AppWideError | "INVALID_INPUT" | "NOT_SHELVED" };
+    error: { error: AppWideError | "INVALID_INPUT" | "NOT_SHELVED" | "UNKNOWN_SESSION" };
   };
   "/shelves/view": {
     input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
       "shelf": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["_shelf"]>[0], ["shelf"]>>;
-      "user": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["_shelf"]>[0], ["user"]>>;
     };
     output: {
       "shelf": {
@@ -145,13 +243,55 @@ export type NoveltyWire = {
         }[];
       };
     };
-    error: { error: AppWideError | "INVALID_INPUT" };
+    error: { error: AppWideError | "INVALID_INPUT" | "UNKNOWN_SESSION" };
   };
 };
 
 export type HttpAppWideError = never;
 
 export type NoveltyWireHttp = {
+  "/auth/current": {
+    input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
+    };
+    output: {
+      "account": Jsonify<AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>>, ["subject"]>>;
+    };
+    error: { error: HttpAppWideError | "INVALID_REQUEST" | "UNAUTHORIZED" };
+  };
+  "/auth/register": {
+    input: {
+      "password": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Authenticating"]["register"]>[0], ["password"]>>;
+      "username": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Authenticating"]["register"]>[0], ["username"]>>;
+    };
+    output: {
+      "account": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["start"]>[0], ["subject"]>>;
+      "expiresAt": Jsonify<AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Sessioning"]["start"]>>, ["expiresAt"]>>;
+      "session": Jsonify<AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Sessioning"]["start"]>>, ["session"]>>;
+    };
+    error: { error: HttpAppWideError | "CONFLICT" | "INVALID_REQUEST" };
+  };
+  "/auth/sign-in": {
+    input: {
+      "password": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Authenticating"]["authenticate"]>[0], ["password"]>>;
+      "username": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Authenticating"]["authenticate"]>[0], ["username"]>>;
+    };
+    output: {
+      "account": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["start"]>[0], ["subject"]>>;
+      "expiresAt": Jsonify<AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Sessioning"]["start"]>>, ["expiresAt"]>>;
+      "session": Jsonify<AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Sessioning"]["start"]>>, ["session"]>>;
+    };
+    error: { error: HttpAppWideError | "INVALID_REQUEST" | "UNAUTHORIZED" };
+  };
+  "/auth/sign-out": {
+    input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["end"]>[0], ["session"]>>;
+    };
+    output: {
+      "ended": Jsonify<AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Sessioning"]["end"]>>, ["ended"]>>;
+    };
+    error: { error: HttpAppWideError | "INVALID_REQUEST" | "UNAUTHORIZED" };
+  };
   "/catalog/card": {
     input: {
       "book": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_book"]>[0], ["book"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_characters"]>[0], ["book"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_genres"]>[0], ["book"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_scores"]>[0], ["book"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_themes"]>[0], ["book"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_tones"]>[0], ["book"]>]>>;
@@ -191,6 +331,15 @@ export type NoveltyWireHttp = {
     };
     error: { error: HttpAppWideError | "INVALID_REQUEST" };
   };
+  "/catalog/grow": {
+    input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
+    };
+    output: {
+      "batch": Jsonify<AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Harvesting"]["start"]>>, ["batch"]>>;
+    };
+    error: { error: HttpAppWideError | "CONFLICT" | "INTERNAL_ERROR" | "INVALID_REQUEST" | "UNAUTHORIZED" };
+  };
   "/catalog/list": {
     input: Record<string, never>;
     output: {
@@ -207,7 +356,7 @@ export type NoveltyWireHttp = {
   };
   "/feed/history": {
     input: {
-      "user": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["_swipes"]>[0], ["user"]>>;
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
     };
     output: {
       "history": {
@@ -217,64 +366,111 @@ export type NoveltyWireHttp = {
         }[];
       };
     };
-    error: { error: HttpAppWideError | "INVALID_REQUEST" };
+    error: { error: HttpAppWideError | "INVALID_REQUEST" | "UNAUTHORIZED" };
   };
   "/feed/like": {
     input: {
-      "item": Jsonify<OneOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["swipeRight"]>[0], ["item"]>, AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["add"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Shelving"]["add"]>>, ["item"]>]>]>>;
-      "user": Jsonify<OneOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["swipeRight"]>[0], ["user"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["add"]>[0], ["user"]>]>>;
+      "item": Jsonify<OneOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["swipeRight"]>[0], ["item"]>, AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["reinforce"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["reinforce"]>>, ["item"]>]>]>>;
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
     };
     output: {
-      "item": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["add"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Shelving"]["add"]>>, ["item"]>]>>;
+      "item": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["reinforce"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["reinforce"]>>, ["item"]>]>>;
     };
-    error: { error: HttpAppWideError | "CONFLICT" | "INVALID_REQUEST" };
+    error: { error: HttpAppWideError | "CONFLICT" | "INVALID_REQUEST" | "NOT_FOUND" | "UNAUTHORIZED" };
   };
   "/feed/pass": {
     input: {
-      "item": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["swipeLeft"]>[0], ["item"]>>;
-      "user": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["swipeLeft"]>[0], ["user"]>>;
+      "item": Jsonify<OneOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["swipeLeft"]>[0], ["item"]>, AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["weaken"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["weaken"]>>, ["item"]>]>]>>;
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
     };
     output: {
-      "item": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["swipeLeft"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Swiping"]["swipeLeft"]>>, ["item"]>]>>;
+      "item": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["weaken"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["weaken"]>>, ["item"]>]>>;
     };
-    error: { error: HttpAppWideError | "CONFLICT" | "INVALID_REQUEST" };
+    error: { error: HttpAppWideError | "CONFLICT" | "INVALID_REQUEST" | "NOT_FOUND" | "UNAUTHORIZED" };
+  };
+  "/feed/ranked": {
+    input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
+    };
+    output: {
+      "ranking": {
+        "items": {
+          "fit": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["_ranked"]>>>, ["fit"]>>;
+          "item": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["_ranked"]>>>, ["item"]>>;
+        }[];
+      };
+    };
+    error: { error: HttpAppWideError | "INVALID_REQUEST" | "UNAUTHORIZED" };
   };
   "/feed/reconsider": {
     input: {
       "item": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["reconsider"]>[0], ["item"]>>;
-      "user": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["reconsider"]>[0], ["user"]>>;
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
     };
     output: {
       "item": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Swiping"]["reconsider"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Swiping"]["reconsider"]>>, ["item"]>]>>;
     };
-    error: { error: HttpAppWideError | "INVALID_REQUEST" | "NOT_FOUND" };
+    error: { error: HttpAppWideError | "INVALID_REQUEST" | "NOT_FOUND" | "UNAUTHORIZED" };
+  };
+  "/profile/view": {
+    input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
+    };
+    output: {
+      "criteria": {
+        "criteria": {
+          "criterion": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_criteria"]>>>, ["criterion"]>>;
+          "description": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_criteria"]>>>, ["description"]>>;
+          "name": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_criteria"]>>>, ["name"]>>;
+        }[];
+      };
+      "weights": {
+        "weights": {
+          "criterion": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["_preferences"]>>>, ["feature"]>>;
+          "weight": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["_preferences"]>>>, ["declared"]>>;
+        }[];
+      };
+    };
+    error: { error: HttpAppWideError | "INVALID_REQUEST" | "UNAUTHORIZED" };
+  };
+  "/profile/weigh": {
+    input: {
+      "criterion": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["declare"]>[0], ["feature"]>>;
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
+      "weight": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["declare"]>[0], ["weight"]>>;
+    };
+    output: {
+      "criterion": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["declare"]>[0], ["feature"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["declare"]>>, ["feature"]>]>>;
+      "weight": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["declare"]>[0], ["weight"]>>;
+    };
+    error: { error: HttpAppWideError | "INVALID_REQUEST" | "UNAUTHORIZED" };
   };
   "/shelves/add": {
     input: {
       "item": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["add"]>[0], ["item"]>>;
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
       "shelf": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["add"]>[0], ["shelf"]>>;
-      "user": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["add"]>[0], ["user"]>>;
     };
     output: {
       "item": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["add"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Shelving"]["add"]>>, ["item"]>]>>;
     };
-    error: { error: HttpAppWideError | "CONFLICT" | "INVALID_REQUEST" };
+    error: { error: HttpAppWideError | "CONFLICT" | "INVALID_REQUEST" | "UNAUTHORIZED" };
   };
   "/shelves/remove": {
     input: {
       "item": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["remove"]>[0], ["item"]>>;
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
       "shelf": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["remove"]>[0], ["shelf"]>>;
-      "user": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["remove"]>[0], ["user"]>>;
     };
     output: {
       "item": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["remove"]>[0], ["item"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Shelving"]["remove"]>>, ["item"]>]>>;
     };
-    error: { error: HttpAppWideError | "INVALID_REQUEST" | "NOT_FOUND" };
+    error: { error: HttpAppWideError | "INVALID_REQUEST" | "NOT_FOUND" | "UNAUTHORIZED" };
   };
   "/shelves/view": {
     input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
       "shelf": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["_shelf"]>[0], ["shelf"]>>;
-      "user": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Shelving"]["_shelf"]>[0], ["user"]>>;
     };
     output: {
       "shelf": {
@@ -283,6 +479,6 @@ export type NoveltyWireHttp = {
         }[];
       };
     };
-    error: { error: HttpAppWideError | "INVALID_REQUEST" };
+    error: { error: HttpAppWideError | "INVALID_REQUEST" | "UNAUTHORIZED" };
   };
 };

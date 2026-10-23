@@ -2,7 +2,7 @@ import { endpoint, receive, respond } from "@mit-sdg/sync-engine/boundary";
 import { each, form, former } from "@mit-sdg/sync-engine/language";
 import { concepts } from "../concepts.ts";
 
-const { Shelving, BookCataloging } = concepts;
+const { Shelving, Sessioning } = concepts;
 
 const ShelfView = former("the shelf view", ({ user, shelf }, { item }) =>
   form({
@@ -12,29 +12,31 @@ const ShelfView = former("the shelf view", ({ user, shelf }, { item }) =>
 
 const View = endpoint(
   "/shelves/view",
-  ({ user, shelf }) =>
-    receive({ user, shelf }).then(
-      respond({ shelf: ShelfView({ user, shelf }) }),
-    ),
-  { input: { required: ["user", "shelf"] } },
+  ({ session, user, shelf }) =>
+    receive({ session, shelf })
+      .then(Sessioning.current({ session }).responds({ subject: user }))
+      .then(respond({ shelf: ShelfView({ user, shelf }) })),
+  { input: { required: ["session", "shelf"] } },
 );
 
 const Add = endpoint(
   "/shelves/add",
-  ({ user, item, shelf }) =>
-    receive({ user, item, shelf })
+  ({ session, user, item, shelf }) =>
+    receive({ session, item, shelf })
+      .then(Sessioning.current({ session }).responds({ subject: user }))
       .then(Shelving.add({ user, item, shelf }).responds({ item }))
       .then(respond({ item })),
-  { input: { required: ["user", "item", "shelf"] } },
+  { input: { required: ["session", "item", "shelf"] } },
 );
 
 const Remove = endpoint(
   "/shelves/remove",
-  ({ user, item, shelf }) =>
-    receive({ user, item, shelf })
+  ({ session, user, item, shelf }) =>
+    receive({ session, item, shelf })
+      .then(Sessioning.current({ session }).responds({ subject: user }))
       .then(Shelving.remove({ user, item, shelf }).responds({ item }))
       .then(respond({ item })),
-  { input: { required: ["user", "item", "shelf"] } },
+  { input: { required: ["session", "item", "shelf"] } },
 );
 
 export const composition = { ShelfView, View, Add, Remove };

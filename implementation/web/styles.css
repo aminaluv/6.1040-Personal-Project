@@ -1,7 +1,7 @@
 body {
   font-family: system-ui, sans-serif;
   max-width: 40rem;
-  margin: 2rem auto;
+  margin: 0 auto 2rem;
   padding: 0 1rem;
 }
 
@@ -14,12 +14,82 @@ li {
   margin: 0.5rem 0;
 }
 
-#card img { max-width: 140px; border-radius: 4px; }
-#card svg text { font-size: 11px; fill: currentColor; }
-#card .ring { fill: none; stroke: #ccc; }
-#card .shape { fill: rgba(80, 120, 220, 0.35); stroke: rgb(80, 120, 220); }
+body { overflow-x: clip; }
+
+/* Layout rules below set display on some elements; the hidden attribute must still win. */
+[hidden] { display: none !important; }
+
+/* Cards share one grid cell, so a leaving card flies off over the next one. */
+#deck { display: grid; }
+#deck > * { grid-area: 1 / 1; }
+
+.card {
+  background: Canvas;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  padding: 1rem;
+  cursor: grab;
+  touch-action: pan-y;
+  user-select: none;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.card.dragging { cursor: grabbing; transition: none; }
+.card.leaving { opacity: 0; pointer-events: none; }
+.card[data-hint="like"] { box-shadow: 0 0 0 3px seagreen; }
+.card[data-hint="pass"] { box-shadow: 0 0 0 3px crimson; }
+
+.card img { max-width: 140px; border-radius: 4px; }
+.card svg text { font-size: 11px; fill: currentColor; }
+.card .ring { fill: none; stroke: #ccc; }
+.card .shape { fill: rgba(80, 120, 220, 0.35); stroke: rgb(80, 120, 220); }
 nav { display: flex; gap: 0.5rem; margin-top: 1rem; }
 
 #tabs { display: flex; gap: 0.5rem; margin-bottom: 0.5rem; }
 #tabs button[aria-pressed="true"] { font-weight: bold; text-decoration: underline; }
 #shelf li button { margin-left: 0.5rem; }
+#auth { display: flex; flex-direction: column; gap: 0.75rem; max-width: 22rem; }
+#auth label { display: flex; flex-direction: column; gap: 0.25rem; }
+#auth .actions { display: flex; gap: 0.5rem; }
+#auth-status { color: crimson; min-height: 1.2em; }
+
+#criteria { list-style: none; padding: 0; }
+#criteria li { margin: 0.75rem 0; }
+#criteria label { display: flex; justify-content: space-between; max-width: 22rem; }
+#criteria p { margin: 0.25rem 0 0; font-size: 0.9em; opacity: 0.75; }
+.card .scores { list-style: none; padding: 0; font-weight: 600; }
+
+#topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: grid;
+  grid-template-columns: 2.75rem 1fr 2.75rem;
+  align-items: center;
+  margin: 0 0 1rem;
+  padding: 0.5rem 0;
+  background: Canvas;
+  border-bottom: 1px solid #ddd;
+}
+#topbar .brand { grid-column: 2; text-align: center; color: inherit; text-decoration: none; }
+#topbar h1 { margin: 0; font-size: 1.5rem; }
+#topbar .icon {
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  color: inherit;
+}
+#topbar .icon[data-view="shelves"] { grid-column: 1; grid-row: 1; }
+#topbar .icon[data-view="profile"] { grid-column: 3; grid-row: 1; }
+#topbar .icon svg {
+  width: 1.6rem;
+  height: 1.6rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.75;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+#topbar .icon:hover { background: rgba(127, 127, 127, 0.15); }
+#topbar .icon[aria-current="page"] { background: rgba(80, 120, 220, 0.2); color: rgb(80, 120, 220); }

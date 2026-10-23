@@ -1,0 +1,3 @@
+[test]
+# Points the app at the throwaway test database and fakes outside credentials before any test runs.
+preload = ["./tests/setup.ts"]

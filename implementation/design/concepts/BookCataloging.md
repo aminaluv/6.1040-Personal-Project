@@ -176,6 +176,12 @@ _characters(book: Book) : many (name: String, role: Role, minAge: Number, maxAge
 _scores(book: Book) : many (criterion: Criterion, criterionName: String, value: Number)
   Answers each score of the book with its criterion's name, ordered by that name.
 
+_criteria() : many (criterion: Criterion, name: String, description: String)
+  Answers every criterion, ordered by name, and no rows when there are none.
+
 _criterionByName(name: String) : optional (criterion: Criterion)
   Answers the criterion with that name, and no row when there is none.
+
+_pending() : many (book: Book, isbn: String, title: String, author: String)
+  Answers every PENDING book, ordered by title, and no rows when there are none.
 ```

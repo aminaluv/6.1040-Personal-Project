@@ -21,6 +21,47 @@ import {
 
 import swipingSpec from "@design/concepts/Swiping.md" with { type: "text" };
 
+import recommendingSpec from "@design/concepts/Recommending.md" with {type: "text"};
+import {
+  RecommendingConcept,
+  InvalidValue,
+  InvalidWeight,
+  UnknownItem,
+} from "./concepts/Recommending.ts";
+
+import harvestingSpec from "@design/concepts/Harvesting.md" with { type: "text" };
+import {
+  HarvestingConcept,
+  InvalidSize,
+  BatchRunning,
+  BatchNotRunning,
+  TopicExhausted,
+  BatchFull,
+  SourceUnavailable,
+} from "./concepts/Harvesting.ts";
+
+import draftingSpec from "@design/concepts/Drafting.md" with { type: "text" };
+import {
+  DraftingConcept,
+  AspectExists,
+  AlreadyDrafted,
+  NoAspects,
+  DraftFailed,
+  NoDraft,
+} from "./concepts/Drafting.ts";
+
+import authenticatingSpec from "@design/concepts/Authenticating.md" with { type: "text" };
+import {
+  AuthenticatingConcept,
+  InvalidUsername,
+  WeakPassword,
+  UsernameTaken,
+  InvalidCredentials,
+} from "./concepts/Authenticating.ts";
+
+import sessioningSpec from "@design/concepts/Sessioning.md" with { type: "text" };
+import { SessioningConcept, UnknownSession } from "./concepts/Sessioning.ts";
+
 import {
   SwipingConcept,
   AlreadySwiped,
@@ -57,10 +98,67 @@ const swiping = registerConcept({
   },
 });
 
+const recommending = registerConcept({
+  class: RecommendingConcept,
+  spec: recommendingSpec,
+  refusals: {
+    INVALID_VALUE: InvalidValue,
+    INVALID_WEIGHT: InvalidWeight,
+    UNKNOWN_ITEM: UnknownItem,
+  },
+});
+
+const harvesting = registerConcept({
+  class: HarvestingConcept,
+  spec: harvestingSpec,
+  refusals: {
+    INVALID_SIZE: InvalidSize,
+    BATCH_RUNNING: BatchRunning,
+    BATCH_NOT_RUNNING: BatchNotRunning,
+    TOPIC_EXHAUSTED: TopicExhausted,
+    BATCH_FULL: BatchFull,
+    SOURCE_UNAVAILABLE: SourceUnavailable,
+  },
+});
+
+const drafting = registerConcept({
+  class: DraftingConcept,
+  spec: draftingSpec,
+  refusals: {
+    ASPECT_EXISTS: AspectExists,
+    ALREADY_DRAFTED: AlreadyDrafted,
+    NO_ASPECTS: NoAspects,
+    DRAFT_FAILED: DraftFailed,
+    NO_DRAFT: NoDraft,
+  },
+});
+
+const authenticating = registerConcept({
+  class: AuthenticatingConcept,
+  spec: authenticatingSpec,
+  refusals: {
+    INVALID_USERNAME: InvalidUsername,
+    WEAK_PASSWORD: WeakPassword,
+    USERNAME_TAKEN: UsernameTaken,
+    INVALID_CREDENTIALS: InvalidCredentials,
+  },
+});
+
+const sessioning = registerConcept({
+  class: SessioningConcept,
+  spec: sessioningSpec,
+  refusals: { UNKNOWN_SESSION: UnknownSession },
+});
+
 export const applicationConceptSet = conceptSet({
+  Authenticating: authenticating,
+  Sessioning: sessioning,
   Shelving: shelving,
   BookCataloging: bookCataloging,
   Swiping: swiping,
+  Recommending: recommending,
+  Harvesting: harvesting,
+  Drafting: drafting,
 });
 
 export const { concepts } = applicationConceptSet;

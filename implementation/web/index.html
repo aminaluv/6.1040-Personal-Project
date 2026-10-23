@@ -8,24 +8,74 @@
     <script type="module" src="./app.ts"></script>
   </head>
   <body>
-    <h1>Novelty</h1>
-    <label>Reader <input id="user" value="jane" /></label>
+    <header id="topbar">
+      <a href="#shelves" class="icon" data-view="shelves" aria-label="Your shelves" title="Your shelves" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M4 4h3v14H4zM9 4h3v14H9zM14.2 5.1l2.9-.8 3.6 13.5-2.9.8z" />
+          <path d="M2 20h20" />
+        </svg>
+      </a>
+      <a href="#" class="brand" data-view="feed"><h1>Novelty</h1></a>
+      <a href="#profile" class="icon" data-view="profile" aria-label="Your profile" title="Your profile" hidden>
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7" />
+        </svg>
+      </a>
+    </header>
 
-    <article id="card"></article>
-    <nav>
-      <button id="pass">✕ Pass</button>
-      <button id="like">Up Next ♥</button>
-    </nav>
-    <p id="status"></p>
-
-    <section>
-      <h2>Your shelves</h2>
-      <div id="tabs">
-        <button data-shelf="UP_NEXT" aria-pressed="true">Up Next</button>
-        <button data-shelf="FAVORITES" aria-pressed="false">Favorites</button>
-        <button data-shelf="PASSED" aria-pressed="false">Passed</button>
+    <form id="auth" hidden>
+      <h2>Sign in to start swiping</h2>
+      <label>Username <input id="username" autocomplete="username" required /></label>
+      <label>
+        Password
+        <input id="password" type="password" autocomplete="current-password" required />
+      </label>
+      <div class="actions">
+        <button type="submit" data-mode="sign-in">Sign in</button>
+        <button type="submit" data-mode="register">Create account</button>
       </div>
-      <ul id="shelf"></ul>
-    </section>
+      <p id="auth-status" role="alert"></p>
+    </form>
+
+    <main id="app" hidden>
+      <section id="feed-view" data-view="feed">
+        <div id="deck" aria-live="polite"></div>
+        <nav>
+          <button id="pass">✕ Pass</button>
+          <button id="like">Up Next ♥</button>
+        </nav>
+        <section id="debug" hidden>
+          <h3>Feed order (debug)</h3>
+          <ol id="debug-list"></ol>
+        </section>
+        <p id="status"></p>
+      </section>
+
+      <section id="shelves-view" data-view="shelves" hidden>
+        <h2>Your shelves</h2>
+        <div id="tabs">
+          <button data-shelf="UP_NEXT" aria-pressed="true">Up Next</button>
+          <button data-shelf="FAVORITES" aria-pressed="false">Favorites</button>
+          <button data-shelf="PASSED" aria-pressed="false">Passed</button>
+        </div>
+        <ul id="shelf"></ul>
+      </section>
+
+      <section id="profile-view" data-view="profile" hidden>
+        <h2>Your profile</h2>
+        <p>
+          Signed in as <strong id="who"></strong>
+          <button id="sign-out">Sign out</button>
+        </p>
+        <h3>Your criteria</h3>
+        <p>
+          Weight what matters to you, from 0 (not at all) to 5. Criteria above 0 appear on each
+          book's radar and count toward your feed's ranking.
+        </p>
+        <ul id="criteria"></ul>
+        <p id="profile-status" role="status"></p>
+      </section>
+    </main>
   </body>
 </html>

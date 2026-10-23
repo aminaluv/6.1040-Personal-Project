@@ -7,13 +7,10 @@ const deadline = Date.now() + (process.argv.includes("--wait") ? 60_000 : 0);
 const client = createHttpClient<NoveltyWireHttp>({ baseUrl: `${address}/api` });
 
 while (true) {
-  const result = await client.shelves.view({
-    user: "healthcheck",
-    shelf: "UP_NEXT",
-  });
+  const result = await client.catalog.list({});
   if (!("error" in result)) {
     console.log(
-      `The API at ${address} answered. It has ${result.shelf.items.length} reservation(s).`,
+      `The API at ${address} answered. Its catalog has ${result.catalog.books.length} book(s).`,
     );
     break;
   }
