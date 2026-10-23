@@ -1,0 +1,14 @@
+{
+  "name": "novelty-deploy",
+  "private": true,
+  "packageManager": "bun@1.4.4",
+  "workspaces": ["implementation"],
+  "overrides": {
+    "bson": "7.2.0"
+  },
+  "scripts": {
+    "start": "bun run --cwd implementation start",
+    "preview": "bun run --cwd implementation preview",
+    "test": "bun run --cwd implementation test"
+  }
+}

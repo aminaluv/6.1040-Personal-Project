@@ -1,10 +1,11 @@
 {
+  "name": "novelty",
   "overrides": {
     "bson": "7.2.0"
   },
   "private": true,
   "type": "module",
-  "packageManager": "bun@1.4.0",
+  "packageManager": "bun@1.4.4",
   "dependencies": {
     "@mit-sdg/sync-engine": "1.1.0",
     "@mit-sdg/sync-engine-http": "1.1.0",
@@ -19,7 +20,7 @@
     "generate": "sync-engine artifacts pin",
     "check": "sync-engine check && sync-engine artifacts check && tsc --noEmit",
     "start": "bun run --parallel start:backend start:frontend",
-    "start:backend": "HOST=127.0.0.1 PORT=4000 bun src/main.ts",
+    "start:backend": "bun run seed && bun run sync-features && HOST=127.0.0.1 PORT=4000 bun src/main.ts",
     "start:frontend": "HOST=0.0.0.0 BACKEND_URL=http://127.0.0.1:4000 bun web/server.ts",
     "check:design": "sync-engine check-design design/concepts/*.md design/types.md design/compositions/*.md",
     "dev": "bun run db:up && bun run --parallel dev:backend dev:frontend",
