@@ -12,6 +12,23 @@
 
 [User Journey](./design/user_journey.md)
 
+## P3 Beta
+
+**App:** [novelty.mit-sdg.dev](https://novelty.mit-sdg.dev/#)
+
+**Demo videos**
+
+- [Beta demo](https://drive.google.com/file/d/159K7dYt9HVSnyecuN_gS0mkIZ4EngeV1/view?usp=sharing)
+- [Alpha demo](https://drive.google.com/file/d/18VW0wxWdoDxm2khsY1ZidhexZvLRYbQi/view?usp=sharing)
+
+**Deliverables**
+
+- [Code](./implementation)
+- Specifications: [concepts](./implementation/design/concepts), [compositions](./implementation/design/compositions), [types](./implementation/design/types.md)
+- [Tests](./implementation/tests) and [saved test output](./implementation/tests/test-output.txt) (see [Running the tests](#running-the-tests))
+- [Visual design study](./design/p3/visual_design.pdf)
+- [Updated user journey](./design/p3/user_journey_p3.md)
+
 ## Running the tests
 
 The app and its tests live in [`implementation/`](./implementation). Run every command below from
