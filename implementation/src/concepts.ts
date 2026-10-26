@@ -25,8 +25,10 @@ import recommendingSpec from "@design/concepts/Recommending.md" with {type: "tex
 import {
   RecommendingConcept,
   InvalidValue,
-  InvalidWeight,
+  InvalidTarget,
+  InvalidImportance,
   UnknownItem,
+  UnknownFeature,
 } from "./concepts/Recommending.ts";
 
 import harvestingSpec from "@design/concepts/Harvesting.md" with { type: "text" };
@@ -48,6 +50,7 @@ import {
   NoAspects,
   DraftFailed,
   NoDraft,
+  NoSuchAspect,
 } from "./concepts/Drafting.ts";
 
 import authenticatingSpec from "@design/concepts/Authenticating.md" with { type: "text" };
@@ -58,6 +61,14 @@ import {
   UsernameTaken,
   InvalidCredentials,
 } from "./concepts/Authenticating.ts";
+
+import followingSpec from "@design/concepts/Following.md" with { type: "text" };
+import {
+  FollowingConcept,
+  SelfFollow,
+  AlreadyFollowing,
+  NotFollowing,
+} from "./concepts/Following.ts";
 
 import sessioningSpec from "@design/concepts/Sessioning.md" with { type: "text" };
 import { SessioningConcept, UnknownSession } from "./concepts/Sessioning.ts";
@@ -103,8 +114,10 @@ const recommending = registerConcept({
   spec: recommendingSpec,
   refusals: {
     INVALID_VALUE: InvalidValue,
-    INVALID_WEIGHT: InvalidWeight,
+    INVALID_TARGET: InvalidTarget,
+    INVALID_IMPORTANCE: InvalidImportance,
     UNKNOWN_ITEM: UnknownItem,
+    UNKNOWN_FEATURE: UnknownFeature,
   },
 });
 
@@ -130,6 +143,7 @@ const drafting = registerConcept({
     NO_ASPECTS: NoAspects,
     DRAFT_FAILED: DraftFailed,
     NO_DRAFT: NoDraft,
+    NO_SUCH_ASPECT: NoSuchAspect,
   },
 });
 
@@ -150,9 +164,20 @@ const sessioning = registerConcept({
   refusals: { UNKNOWN_SESSION: UnknownSession },
 });
 
+const following = registerConcept({
+  class: FollowingConcept,
+  spec: followingSpec,
+  refusals: {
+    SELF_FOLLOW: SelfFollow,
+    ALREADY_FOLLOWING: AlreadyFollowing,
+    NOT_FOLLOWING: NotFollowing,
+  },
+});
+
 export const applicationConceptSet = conceptSet({
   Authenticating: authenticating,
   Sessioning: sessioning,
+  Following: following,
   Shelving: shelving,
   BookCataloging: bookCataloging,
   Swiping: swiping,

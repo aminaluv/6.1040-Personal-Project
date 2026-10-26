@@ -35,8 +35,10 @@ Defined in [BookCataloging](../design/concepts/BookCataloging.md), line 1.
 
 #### Actions
 
-- `defineCriterion(name: String, description: String) : returns (criterion: Criterion)`
+- `defineCriterion(name: String, description: String, low: String, high: String) : returns (criterion: Criterion)`
   - Refuses `CRITERION_EXISTS`: A criterion with that name already exists.
+- `removeCriterion(criterion: Criterion) : returns (name: String)`
+  - Refuses `NO_SUCH_CRITERION`: There is no such criterion.
 - `addBook(isbn: String, title: String, author: String, published: Date, pageCount: Number, coverUrl: String) : returns (book: Book)`
   - Refuses `DUPLICATE_ISBN`: A book with that ISBN is already in the catalog.
 - `addCharacter(book: Book, name: String, role: Role, minAge: Number, maxAge: Number) : returns (character: Character)`
@@ -60,13 +62,13 @@ Defined in [BookCataloging](../design/concepts/BookCataloging.md), line 1.
 #### Queries
 
 - `_described() : many (book: Book, title: String, author: String, coverUrl: String)`
-- `_book(book: Book) : optional (title: String, author: String, published: Date, pageCount: Number, coverUrl: String, summary: String, setting: String)`
+- `_book(book: Book) : optional (isbn: String, title: String, author: String, published: Date, pageCount: Number, coverUrl: String, summary: String, setting: String)`
 - `_genres(book: Book) : many (genre: String)`
 - `_themes(book: Book) : many (theme: String)`
 - `_tones(book: Book) : many (tone: String)`
 - `_characters(book: Book) : many (name: String, role: Role, minAge: Number, maxAge: Number)`
-- `_scores(book: Book) : many (criterion: Criterion, criterionName: String, value: Number)`
-- `_criteria() : many (criterion: Criterion, name: String, description: String)`
+- `_scores(book: Book) : many (criterion: Criterion, criterionName: String, low: String, high: String, value: Number)`
+- `_criteria() : many (criterion: Criterion, name: String, description: String, low: String, high: String)`
 - `_criterionByName(name: String) : optional (criterion: Criterion)`
 - `_pending() : many (book: Book, isbn: String, title: String, author: String)`
 
@@ -86,6 +88,11 @@ Defined in [Drafting](../design/concepts/Drafting.md), line 1.
   - Refuses `ALREADY_DRAFTED`: That item already has a draft.
   - Refuses `NO_ASPECTS`: Define at least one aspect before drafting.
   - Refuses `DRAFT_FAILED`: The agent couldn't produce a complete draft.
+- `rerate(item: Item, title: String, author: String, source: String) : returns (draft: Draft)`
+  - Refuses `NO_DRAFT`: That item has no draft.
+  - Refuses `DRAFT_FAILED`: The agent couldn't rate every aspect.
+- `removeAspect(name: String) : returns (name: String)`
+  - Refuses `NO_SUCH_ASPECT`: There is no aspect with that name.
 - `discard(item: Item) : returns (item: Item)`
   - Refuses `NO_DRAFT`: That item has no draft.
 
@@ -99,8 +106,31 @@ Defined in [Drafting](../design/concepts/Drafting.md), line 1.
 
 #### Instances
 
-- `Drafting` — instance of `Drafting` — [Application types](../design/types.md), line 30.
-  - `Item` is `BookCataloging.Book` — [Application types](../design/types.md), line 31.
+- `Drafting` — instance of `Drafting` — [Application types](../design/types.md), line 33.
+  - `Item` is `BookCataloging.Book` — [Application types](../design/types.md), line 34.
+
+### Following
+
+Defined in [Following](../design/concepts/Following.md), line 1.
+
+#### Actions
+
+- `follow(follower: User, followee: User) : returns (followee: User)`
+  - Refuses `SELF_FOLLOW`: You can't follow yourself.
+  - Refuses `ALREADY_FOLLOWING`: You already follow this reader.
+- `unfollow(follower: User, followee: User) : returns (followee: User)`
+  - Refuses `NOT_FOLLOWING`: You don't follow this reader.
+
+#### Queries
+
+- `_following(user: User) : many (followee: User)`
+- `_followers(user: User) : many (follower: User)`
+- `_isFollowing(follower: User, followee: User) : one (following: Flag)`
+
+#### Instances
+
+- `Following` — instance of `Following` — [Application types](../design/types.md), line 28.
+  - `User` is `Authenticating.Account` — [Application types](../design/types.md), line 29.
 
 ### Harvesting
 
@@ -126,7 +156,7 @@ Defined in [Harvesting](../design/concepts/Harvesting.md), line 1.
 
 #### Instances
 
-- `Harvesting` — instance of `Harvesting` — [Application types](../design/types.md), line 28.
+- `Harvesting` — instance of `Harvesting` — [Application types](../design/types.md), line 31.
 
 ### Recommending
 
@@ -138,8 +168,11 @@ Defined in [Recommending](../design/concepts/Recommending.md), line 1.
   - Refuses `INVALID_VALUE`: A feature value must be between 0 and 10.
 - `clearItem(item: Item) : returns (item: Item)`
   - Refuses `UNKNOWN_ITEM`: That item has no feature values.
-- `declare(user: User, feature: Feature, weight: Number) : returns (feature: Feature)`
-  - Refuses `INVALID_WEIGHT`: A declared weight must be between 0 and 5.
+- `clearFeature(feature: Feature) : returns (feature: Feature)`
+  - Refuses `UNKNOWN_FEATURE`: Nothing is scored or preferred on that feature.
+- `prefer(user: User, feature: Feature, target: Number, importance: Number) : returns (feature: Feature)`
+  - Refuses `INVALID_TARGET`: A preferred value must be between 0 and 10.
+  - Refuses `INVALID_IMPORTANCE`: Importance must be between 0 and 5.
 - `reinforce(user: User, item: Item) : returns (item: Item)`
   - Refuses `UNKNOWN_ITEM`: That item has no feature values.
 - `weaken(user: User, item: Item) : returns (item: Item)`
@@ -148,7 +181,7 @@ Defined in [Recommending](../design/concepts/Recommending.md), line 1.
 #### Queries
 
 - `_ranked(user: User) : many (item: Item, fit: Number)`
-- `_preferences(user: User) : many (feature: Feature, declared: Number, learned: Number)`
+- `_preferences(user: User) : many (feature: Feature, importance: Number, target: Number, lean: Number)`
 
 #### Instances
 
@@ -227,18 +260,33 @@ Defined in [Swiping](../design/concepts/Swiping.md), line 1.
 _Formers name result shapes evaluated when asked. The source former owns_
 _the authored explanation; this section records the generated shape._
 
+### a friend's shelf
+
+Authored path: `Friends.FriendShelf`.
+- Covered by [Friends](../design/compositions/Friends.md), line 26.
+
+```former
+Former "a friend's shelf" — inputs (user, shelf); bindings (item); promises exactly one record — forms:
+  a record of
+    items: each Shelving._shelf (shelf, user) has (item)
+      form a record of
+        item
+```
+
 ### every criterion
 
 Authored path: `Profile.CriteriaList`.
 - Covered by [Profile](../design/compositions/Profile.md), line 4.
 
 ```former
-Former "every criterion" — inputs (); bindings (criterion, name, description); promises exactly one record — forms:
+Former "every criterion" — inputs (); bindings (criterion, name, description, low, high); promises exactly one record — forms:
   a record of
-    criteria: each BookCataloging._criteria () has (criterion, description, name)
+    criteria: each BookCataloging._criteria () has (criterion, description, high, low, name)
       form a record of
         criterion
         description
+        high
+        low
         name
 ```
 
@@ -264,7 +312,7 @@ Authored path: `Catalog.FirstImpression`.
 - Covered by [Catalog](../design/compositions/Catalog.md), line 11.
 
 ```former
-Former "the first impression card" — inputs (book); bindings (title, author, published, pageCount, coverUrl, genre, summary, setting, theme, tone, name, role, minAge, maxAge, criterion, criterionName, value); promises exactly one record — forms:
+Former "the first impression card" — inputs (book); bindings (title, author, published, pageCount, coverUrl, genre, summary, setting, theme, tone, name, role, minAge, maxAge, criterion, criterionName, low, high, value); promises exactly one record — forms:
   a record of
     characters: each BookCataloging._characters (book) has (maxAge, minAge, name, role)
       form a record of
@@ -284,10 +332,12 @@ Former "the first impression card" — inputs (book); bindings (title, author, p
     genres: each BookCataloging._genres (book) has (genre)
       form a record of
         genre
-    scores: each BookCataloging._scores (book) has (criterion, criterionName, value)
+    scores: each BookCataloging._scores (book) has (criterion, criterionName, high, low, value)
       form a record of
         criterion
         criterionName
+        high
+        low
         value
     themes: each BookCataloging._themes (book) has (theme)
       form a record of
@@ -295,6 +345,32 @@ Former "the first impression card" — inputs (book); bindings (title, author, p
     tones: each BookCataloging._tones (book) has (tone)
       form a record of
         tone
+```
+
+### the people a reader follows
+
+Authored path: `Friends.FollowingList`.
+- Covered by [Friends](../design/compositions/Friends.md), line 7.
+
+```former
+Former "the people a reader follows" — inputs (user); bindings (followee); promises exactly one record — forms:
+  a record of
+    people: each Following._following (user) has (followee)
+      form a record of
+        username: followee
+```
+
+### the people who follow a reader
+
+Authored path: `Friends.FollowerList`.
+- Covered by [Friends](../design/compositions/Friends.md), line 8.
+
+```former
+Former "the people who follow a reader" — inputs (user); bindings (follower); promises exactly one record — forms:
+  a record of
+    people: each Following._followers (user) has (follower)
+      form a record of
+        username: follower
 ```
 
 ### the ranked feed
@@ -311,18 +387,19 @@ Former "the ranked feed" — inputs (user); bindings (item, fit); promises exact
         item
 ```
 
-### the reader's weights
+### the reader's preferences
 
 Authored path: `Profile.WeightList`.
 - Covered by [Profile](../design/compositions/Profile.md), line 5.
 
 ```former
-Former "the reader's weights" — inputs (user); bindings (feature, declared); promises exactly one record — forms:
+Former "the reader's preferences" — inputs (user); bindings (feature, importance, target); promises exactly one record — forms:
   a record of
-    weights: each Recommending._preferences (user) has (declared, feature)
+    preferences: each Recommending._preferences (user) has (feature, importance, target)
       form a record of
         criterion: feature
-        weight: declared
+        importance
+        target
 ```
 
 ### the shelf view
@@ -606,6 +683,187 @@ then
   RequestBoundary.respond (item, requestId)
 ```
 
+### Friends.Follow
+
+Authored path: `Friends.Follow`.
+- Covered by [Friends](../design/compositions/Friends.md), line 14.
+- Covered by [Friends](../design/compositions/Friends.md), line 20.
+
+```reaction
+when RequestBoundary.request (path: "/friends/follow", requestId, session, username)
+then
+  Sessioning.current (session)
+```
+
+### Friends.Follow:registered#2
+
+Authored path: `Friends.Follow`.
+- Covered by [Friends](../design/compositions/Friends.md), line 14.
+- Covered by [Friends](../design/compositions/Friends.md), line 20.
+
+```reaction
+when Sessioning.current (session, subject: user), asked by Friends.Follow
+where
+  earlier, RequestBoundary.request (path: "/friends/follow", requestId, session, username)
+  Authenticating._registered (username) has (registered: true)
+then
+  Following.follow (followee: username, follower: user)
+```
+
+### Friends.Follow:registered#3
+
+Authored path: `Friends.Follow`.
+- Covered by [Friends](../design/compositions/Friends.md), line 14.
+- Covered by [Friends](../design/compositions/Friends.md), line 20.
+
+```reaction
+when Following.follow (followee: username, follower: user), asked by Friends.Follow:registered#2
+where
+  earlier, RequestBoundary.request (path: "/friends/follow", requestId, session, username)
+then
+  RequestBoundary.respond (requestId, username)
+```
+
+### Friends.Follow:unknown#2
+
+Authored path: `Friends.Follow`.
+- Covered by [Friends](../design/compositions/Friends.md), line 14.
+- Covered by [Friends](../design/compositions/Friends.md), line 20.
+
+```reaction
+when Sessioning.current (session, subject: user), asked by Friends.Follow
+where
+  earlier, RequestBoundary.request (path: "/friends/follow", requestId, session, username)
+  Authenticating._registered (username) has (registered: false)
+then
+  RequestBoundary.respond (error: "NO_SUCH_READER", requestId)
+```
+
+### Friends.Network
+
+Authored path: `Friends.Network`.
+- Covered by [Friends](../design/compositions/Friends.md), line 6.
+- Covered by [Friends](../design/compositions/Friends.md), line 11.
+
+```reaction
+when RequestBoundary.request (path: "/friends/mine", requestId, session)
+then
+  Sessioning.current (session)
+```
+
+### Friends.Network#2
+
+Authored path: `Friends.Network`.
+- Covered by [Friends](../design/compositions/Friends.md), line 6.
+- Covered by [Friends](../design/compositions/Friends.md), line 11.
+
+```reaction
+when Sessioning.current (session, subject: user), asked by Friends.Network
+where
+  earlier, RequestBoundary.request (path: "/friends/mine", requestId, session)
+then
+  RequestBoundary.respond (followers: former "the people who follow a reader" with (user), following: former "the people a reader follows" with (user), requestId)
+```
+
+### Friends.Reader
+
+Authored path: `Friends.Reader`.
+- Covered by [Friends](../design/compositions/Friends.md), line 24.
+- Covered by [Friends](../design/compositions/Friends.md), line 30.
+
+```reaction
+when RequestBoundary.request (path: "/friends/reader", requestId, session, username)
+then
+  Sessioning.current (session)
+```
+
+### Friends.Reader:followed#2
+
+Authored path: `Friends.Reader`.
+- Covered by [Friends](../design/compositions/Friends.md), line 24.
+- Covered by [Friends](../design/compositions/Friends.md), line 30.
+
+```reaction
+when Sessioning.current (session, subject: user), asked by Friends.Reader
+where
+  earlier, RequestBoundary.request (path: "/friends/reader", requestId, session, username)
+  Authenticating._registered (username) has (registered: true)
+  Following._isFollowing (followee: username, follower: user) has (following: true)
+then
+  RequestBoundary.respond (favorites: former "a friend's shelf" with (shelf: "FAVORITES", user: username), finished: former "a friend's shelf" with (shelf: "FINISHED", user: username), followedByYou: true, followers: former "the people who follow a reader" with (user: username), following: former "the people a reader follows" with (user: username), requestId, upNext: former "a friend's shelf" with (shelf: "UP_NEXT", user: username), username)
+```
+
+### Friends.Reader:not-followed#2
+
+Authored path: `Friends.Reader`.
+- Covered by [Friends](../design/compositions/Friends.md), line 24.
+- Covered by [Friends](../design/compositions/Friends.md), line 30.
+
+```reaction
+when Sessioning.current (session, subject: user), asked by Friends.Reader
+where
+  earlier, RequestBoundary.request (path: "/friends/reader", requestId, session, username)
+  Authenticating._registered (username) has (registered: true)
+  Following._isFollowing (followee: username, follower: user) has (following: false)
+then
+  RequestBoundary.respond (followedByYou: false, followers: former "the people who follow a reader" with (user: username), following: former "the people a reader follows" with (user: username), requestId, username)
+```
+
+### Friends.Reader:unknown#2
+
+Authored path: `Friends.Reader`.
+- Covered by [Friends](../design/compositions/Friends.md), line 24.
+- Covered by [Friends](../design/compositions/Friends.md), line 30.
+
+```reaction
+when Sessioning.current (session, subject: user), asked by Friends.Reader
+where
+  earlier, RequestBoundary.request (path: "/friends/reader", requestId, session, username)
+  Authenticating._registered (username) has (registered: false)
+then
+  RequestBoundary.respond (error: "NO_SUCH_READER", requestId)
+```
+
+### Friends.Unfollow
+
+Authored path: `Friends.Unfollow`.
+- Covered by [Friends](../design/compositions/Friends.md), line 17.
+- Covered by [Friends](../design/compositions/Friends.md), line 21.
+
+```reaction
+when RequestBoundary.request (path: "/friends/unfollow", requestId, session, username)
+then
+  Sessioning.current (session)
+```
+
+### Friends.Unfollow#2
+
+Authored path: `Friends.Unfollow`.
+- Covered by [Friends](../design/compositions/Friends.md), line 17.
+- Covered by [Friends](../design/compositions/Friends.md), line 21.
+
+```reaction
+when Sessioning.current (session, subject: user), asked by Friends.Unfollow
+where
+  earlier, RequestBoundary.request (path: "/friends/unfollow", requestId, session, username)
+then
+  Following.unfollow (followee: username, follower: user)
+```
+
+### Friends.Unfollow#3
+
+Authored path: `Friends.Unfollow`.
+- Covered by [Friends](../design/compositions/Friends.md), line 17.
+- Covered by [Friends](../design/compositions/Friends.md), line 21.
+
+```reaction
+when Following.unfollow (followee: username, follower: user), asked by Friends.Unfollow#2
+where
+  earlier, RequestBoundary.request (path: "/friends/unfollow", requestId, session, username)
+then
+  RequestBoundary.respond (requestId, username)
+```
+
 ### Growing.AddHarvestedBook
 
 Authored path: `Growing.AddHarvestedBook`.
@@ -861,17 +1119,17 @@ when Sessioning.current (session, subject: user), asked by Profile.View
 where
   earlier, RequestBoundary.request (path: "/profile/view", requestId, session)
 then
-  RequestBoundary.respond (criteria: former "every criterion", requestId, weights: former "the reader's weights" with (user))
+  RequestBoundary.respond (criteria: former "every criterion", preferences: former "the reader's preferences" with (user), requestId)
 ```
 
 ### Profile.Weigh
 
 Authored path: `Profile.Weigh`.
-- Covered by [Profile](../design/compositions/Profile.md), line 12.
-- Covered by [Profile](../design/compositions/Profile.md), line 20.
+- Covered by [Profile](../design/compositions/Profile.md), line 14.
+- Covered by [Profile](../design/compositions/Profile.md), line 22.
 
 ```reaction
-when RequestBoundary.request (criterion, path: "/profile/weigh", requestId, session, weight)
+when RequestBoundary.request (criterion, importance, path: "/profile/weigh", requestId, session, target)
 then
   Sessioning.current (session)
 ```
@@ -879,29 +1137,29 @@ then
 ### Profile.Weigh#2
 
 Authored path: `Profile.Weigh`.
-- Covered by [Profile](../design/compositions/Profile.md), line 12.
-- Covered by [Profile](../design/compositions/Profile.md), line 20.
+- Covered by [Profile](../design/compositions/Profile.md), line 14.
+- Covered by [Profile](../design/compositions/Profile.md), line 22.
 
 ```reaction
 when Sessioning.current (session, subject: user), asked by Profile.Weigh
 where
-  earlier, RequestBoundary.request (criterion, path: "/profile/weigh", requestId, session, weight)
+  earlier, RequestBoundary.request (criterion, importance, path: "/profile/weigh", requestId, session, target)
 then
-  Recommending.declare (feature: criterion, user, weight)
+  Recommending.prefer (feature: criterion, importance, target, user)
 ```
 
 ### Profile.Weigh#3
 
 Authored path: `Profile.Weigh`.
-- Covered by [Profile](../design/compositions/Profile.md), line 12.
-- Covered by [Profile](../design/compositions/Profile.md), line 20.
+- Covered by [Profile](../design/compositions/Profile.md), line 14.
+- Covered by [Profile](../design/compositions/Profile.md), line 22.
 
 ```reaction
-when Recommending.declare (feature: criterion, user, weight), asked by Profile.Weigh#2
+when Recommending.prefer (feature: criterion, importance, target, user), asked by Profile.Weigh#2
 where
-  earlier, RequestBoundary.request (criterion, path: "/profile/weigh", requestId, session, weight)
+  earlier, RequestBoundary.request (criterion, importance, path: "/profile/weigh", requestId, session, target)
 then
-  RequestBoundary.respond (criterion, requestId, weight)
+  RequestBoundary.respond (criterion, importance, requestId, target)
 ```
 
 ### Sessions.Current
@@ -1156,8 +1414,12 @@ not listed here have no explicit input contract.
 - `/feed/pass` — requires `session`, `item`
 - `/feed/ranked` — requires `session`
 - `/feed/reconsider` — requires `session`, `item`
+- `/friends/follow` — requires `session`, `username`
+- `/friends/mine` — requires `session`
+- `/friends/reader` — requires `session`, `username`
+- `/friends/unfollow` — requires `session`, `username`
 - `/profile/view` — requires `session`
-- `/profile/weigh` — requires `session`, `criterion`, `weight`
+- `/profile/weigh` — requires `session`, `criterion`, `target`, `importance`
 - `/shelves/add` — requires `session`, `item`, `shelf`
 - `/shelves/remove` — requires `session`, `item`, `shelf`
 - `/shelves/view` — requires `session`, `shelf`

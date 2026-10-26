@@ -10,7 +10,7 @@ beforeEach(async () => {
 });
 
 describe("Shelving", () => {
-  test("principle: books move from Up Next to Favorites, and each shelf shows its own", async () => {
+  test("principle: finished books move off Up Next, and loved ones are favorites too", async () => {
     await shelving.add({ user: "jane", item: "brave-new-world", shelf: "UP_NEXT" });
     await Bun.sleep(5);
     await shelving.add({ user: "jane", item: "klara-and-the-sun", shelf: "UP_NEXT" });
@@ -19,8 +19,14 @@ describe("Shelving", () => {
       { item: "klara-and-the-sun" },
     ]);
     await shelving.remove({ user: "jane", item: "brave-new-world", shelf: "UP_NEXT" });
+    await shelving.add({ user: "jane", item: "brave-new-world", shelf: "FINISHED" });
     await shelving.add({ user: "jane", item: "brave-new-world", shelf: "FAVORITES" });
-    expect(await shelving._shelf({ user: "jane", shelf: "UP_NEXT" })).toEqual([
+    await Bun.sleep(5);
+    await shelving.remove({ user: "jane", item: "klara-and-the-sun", shelf: "UP_NEXT" });
+    await shelving.add({ user: "jane", item: "klara-and-the-sun", shelf: "FINISHED" });
+    expect(await shelving._shelf({ user: "jane", shelf: "UP_NEXT" })).toEqual([]);
+    expect(await shelving._shelf({ user: "jane", shelf: "FINISHED" })).toEqual([
+      { item: "brave-new-world" },
       { item: "klara-and-the-sun" },
     ]);
     expect(await shelving._shelf({ user: "jane", shelf: "FAVORITES" })).toEqual([

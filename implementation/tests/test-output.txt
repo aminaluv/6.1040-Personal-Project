@@ -1,90 +1,112 @@
-bun test v1.4.2 (744846f84)
+bun test v1.4.4 (38afee6c8)
 
 tests/compositions/Profile.test.ts:
-(pass) Profile > a new reader sees every criterion and no weights yet [30.25ms]
-(pass) Profile > weighting criteria saves them and reorders the reader's feed [25.01ms]
-(pass) Profile > weights outside 0 to 5 are refused [11.86ms]
-(pass) Profile > one reader's weights don't affect another's [21.09ms]
+(pass) Profile > a new reader sees every criterion with both ends of its scale, and no preferences [34.70ms]
+(pass) Profile > a preference saves where the reader likes a criterion and how much it matters [16.59ms]
+(pass) Profile > a slow-burn reader and a page-turner reader get opposite feeds [32.96ms]
+(pass) Profile > an importance of 0 stops a criterion from steering the feed [20.99ms]
+(pass) Profile > positions outside 0 to 10 and importance outside 0 to 5 are refused [16.37ms]
+
+tests/compositions/Friends.test.ts:
+(pass) Friends > before following, a reader's network is visible but their shelves aren't [5.00ms]
+(pass) Friends > after following, both networks update and the friend's shelves are shared [18.30ms]
+(pass) Friends > a reader can add a friend's book to their own Up Next [2.81ms]
+(pass) Friends > following is one-way: the friend doesn't see the follower's shelves [2.87ms]
+(pass) Friends > unfollowing stops sharing the friend's shelves [4.61ms]
+(pass) Friends > unknown readers, yourself, repeats and strangers get the right errors [9.37ms]
+(pass) Friends > every friends endpoint needs a signed-in reader [2.54ms]
 
 tests/compositions/Growing.test.ts:
-(pass) Growing > a batch harvests the liked genre and adds complete, ranked books [125.33ms]
-{"requestId":"858ec32a-6827-4ed7-99d1-665d623082a1","level":"warn","message":"Reaction \"DeliverRefusalToAsker\" answered a request on \"?\" after it stopped pending. Reactions that can answer the same request must partition their conditions; registration order never decides. A timeout can also make an answer arrive late.","timestamp":"2026-10-23T07:33:23.258Z"}
-{"requestId":"858ec32a-6827-4ed7-99d1-665d623082a1","level":"warn","message":"Reaction \"DeliverRefusalToAsker\" answered a request on \"?\" after it stopped pending. Reactions that can answer the same request must partition their conditions; registration order never decides. A timeout can also make an answer arrive late.","timestamp":"2026-10-23T07:33:23.262Z"}
-{"requestId":"8cfccd1c-b787-4a73-adb1-dab122b5d745","level":"warn","message":"Reaction \"DeliverRefusalToAsker\" answered a request on \"?\" after it stopped pending. Reactions that can answer the same request must partition their conditions; registration order never decides. A timeout can also make an answer arrive late.","timestamp":"2026-10-23T07:33:23.273Z"}
-(pass) Growing > a book whose draft failed stays hidden, and the next batch drafts it again [50.59ms]
-(pass) Growing > a second request while a batch is running is refused [9.26ms]
-(pass) Growing > growing needs a signed-in reader [0.69ms]
+(pass) Growing > a batch harvests the liked genre and adds complete, ranked books [158.62ms]
+{"requestId":"581c6aed-7303-4d61-ac6f-501bd2b52246","level":"warn","message":"Reaction \"DeliverRefusalToAsker\" answered a request on \"?\" after it stopped pending. Reactions that can answer the same request must partition their conditions; registration order never decides. A timeout can also make an answer arrive late.","timestamp":"2026-10-26T14:08:51.817Z"}
+{"requestId":"581c6aed-7303-4d61-ac6f-501bd2b52246","level":"warn","message":"Reaction \"DeliverRefusalToAsker\" answered a request on \"?\" after it stopped pending. Reactions that can answer the same request must partition their conditions; registration order never decides. A timeout can also make an answer arrive late.","timestamp":"2026-10-26T14:08:51.820Z"}
+{"requestId":"5296afc9-9786-4aef-a283-da6a62667d44","level":"warn","message":"Reaction \"DeliverRefusalToAsker\" answered a request on \"?\" after it stopped pending. Reactions that can answer the same request must partition their conditions; registration order never decides. A timeout can also make an answer arrive late.","timestamp":"2026-10-26T14:08:51.836Z"}
+(pass) Growing > a book whose draft failed stays hidden, and the next batch drafts it again [70.78ms]
+(pass) Growing > a second request while a batch is running is refused [13.21ms]
+(pass) Growing > growing needs a signed-in reader [0.89ms]
 
 tests/compositions/Sessions.test.ts:
-(pass) Sessions > registering signs the reader in as the new account [17.33ms]
-(pass) Sessions > signing in with the right password starts a new, independent session [16.21ms]
-(pass) Sessions > bad credentials and taken or malformed usernames get the right errors [20.75ms]
-(pass) Sessions > a signed-out or invented session can't reach reader endpoints [12.57ms]
+(pass) Sessions > registering signs the reader in as the new account [27.54ms]
+(pass) Sessions > signing in with the right password starts a new, independent session [25.79ms]
+(pass) Sessions > bad credentials and taken or malformed usernames get the right errors [32.05ms]
+(pass) Sessions > a signed-out or invented session can't reach reader endpoints [19.41ms]
 
 tests/compositions/Feed.test.ts:
-(pass) Feed > liking a book records it, shelves it in Up Next, and steers the ranking [32.64ms]
-(pass) Feed > passing records the swipe without shelving, and steers away [12.85ms]
-(pass) Feed > a book can't be swiped twice until it's reconsidered [14.90ms]
-(pass) Feed > each reader's swipes and shelves are their own [19.80ms]
-(pass) Feed > shelves move books from Up Next to Favorites [16.33ms]
-(pass) Feed > the catalog lists described books and opens a complete card [3.00ms]
+(pass) Feed > liking a book records it, shelves it in Up Next, and steers the ranking [47.27ms]
+(pass) Feed > passing records the swipe without shelving, and steers away [18.02ms]
+(pass) Feed > a book can't be swiped twice until it's reconsidered [21.22ms]
+(pass) Feed > each reader's swipes and shelves are their own [27.51ms]
+(pass) Feed > shelves move books from Up Next to Favorites [20.93ms]
+(pass) Feed > the catalog lists described books and opens a complete card [4.11ms]
 
 tests/concepts/Sessioning.test.ts:
-(pass) Sessioning > principle: a session resolves to its subject until it is ended [8.00ms]
-(pass) Sessioning > an invented session is refused [0.88ms]
-(pass) Sessioning > an expired session is refused, and the next start clears it away [6.42ms]
-(pass) Sessioning > sessions are independent and unguessable [5.35ms]
+(pass) Sessioning > principle: a session resolves to its subject until it is ended [10.65ms]
+(pass) Sessioning > an invented session is refused [1.08ms]
+(pass) Sessioning > an expired session is refused, and the next start clears it away [8.68ms]
+(pass) Sessioning > sessions are independent and unguessable [7.28ms]
 
 tests/concepts/Shelving.test.ts:
-(pass) Shelving > principle: books move from Up Next to Favorites, and each shelf shows its own [14.90ms]
-(pass) Shelving > a book can't be on the same shelf twice, but can be on two shelves [6.55ms]
-(pass) Shelving > removing a book that isn't there is refused [0.85ms]
+(pass) Shelving > principle: finished books move off Up Next, and loved ones are favorites too [23.23ms]
+(pass) Shelving > a book can't be on the same shelf twice, but can be on two shelves [9.09ms]
+(pass) Shelving > removing a book that isn't there is refused [0.92ms]
 
 tests/concepts/Swiping.test.ts:
-(pass) Swiping > principle: swipes are recorded once each, and reconsidering frees a book [12.86ms]
-(pass) Swiping > reconsidering an unswiped book is refused [0.70ms]
-(pass) Swiping > each reader's swipes are separate [7.05ms]
+(pass) Swiping > principle: swipes are recorded once each, and reconsidering frees a book [15.65ms]
+(pass) Swiping > reconsidering an unswiped book is refused [0.82ms]
+(pass) Swiping > each reader's swipes are separate [9.01ms]
 
 tests/concepts/Recommending.test.ts:
-(pass) Recommending > principle: liking a book ranks similar books above dissimilar ones [13.40ms]
-(pass) Recommending > passing on a book pushes the ranking away from it [12.56ms]
-(pass) Recommending > declared weights rank books strong on that criterion first, and keep learned weights [13.65ms]
-(pass) Recommending > learned weights stay between -5 and 5 [35.80ms]
-(pass) Recommending > refuses out-of-range values and items without features [12.73ms]
+(pass) Recommending > principle: a stated preference for a slow burn ranks slow books first [17.02ms]
+(pass) Recommending > principle: liking fast books moves a quiet reader's lean toward fast [21.68ms]
+(pass) Recommending > high isn't better: preferring the middle ranks the middle first [18.33ms]
+(pass) Recommending > passing moves the lean away from a book [19.11ms]
+(pass) Recommending > a stated preference outweighs what swipes alone suggest [37.80ms]
+(pass) Recommending > setting a preference keeps what swipes taught, and leans stay within 0 to 10 [51.46ms]
+(pass) Recommending > clearing a feature removes its values and every preference on it [19.26ms]
+(pass) Recommending > refuses out-of-range values, targets and importance, and items without features [17.17ms]
+
+tests/concepts/Following.test.ts:
+(pass) Following > principle: a follow shows on both sides until it's undone [11.69ms]
+(pass) Following > refuses following yourself, following twice, and unfollowing a stranger [10.29ms]
+(pass) Following > lists are alphabetical, and following is one-way [12.01ms]
 
 tests/concepts/BookCataloging.test.ts:
-(pass) BookCataloging > principle: a described, scored book shows what it's about and how it scores [23.65ms]
-(pass) BookCataloging > details can only be added while a book is pending, and scores only once described [20.24ms]
-(pass) BookCataloging > refuses duplicates and invalid values [21.82ms]
-(pass) BookCataloging > resetting a description sends a book back to pending without its details [20.84ms]
-(pass) BookCataloging > lists every criterion by name [18.84ms]
+(pass) BookCataloging > principle: a described, scored book shows what it's about and where it sits on a scale [37.16ms]
+(pass) BookCataloging > details can only be added while a book is pending, and scores only once described [27.51ms]
+(pass) BookCataloging > refuses duplicates and invalid values [29.11ms]
+(pass) BookCataloging > resetting a description sends a book back to pending without its details [90.62ms]
+(pass) BookCataloging > removing a criterion removes its scores too [31.84ms]
+(pass) BookCataloging > lists every criterion by name [24.47ms]
 
 tests/concepts/Drafting.test.ts:
-(pass) Drafting > principle: a draft holds everything needed to describe the book [21.04ms]
-(pass) Drafting > refuses without aspects, and refuses a second draft of the same item [20.58ms]
-(pass) Drafting > an incomplete answer is refused and nothing is kept [14.77ms]
-(pass) Drafting > invalid characters are dropped, but at least one valid one is required [21.58ms]
-(pass) Drafting > an overloaded model falls back to the other one [22.25ms]
+(pass) Drafting > principle: a draft holds everything needed to describe the book [28.35ms]
+(pass) Drafting > refuses without aspects, and refuses a second draft of the same item [27.16ms]
+(pass) Drafting > an incomplete answer is refused and nothing is kept [22.32ms]
+(pass) Drafting > invalid characters are dropped, but at least one valid one is required [28.55ms]
+(pass) Drafting > an overloaded model falls back to the other one [24.25ms]
 Drafting The Hobbit failed: Gemini quota exhausted, retry in 691s.
-(pass) Drafting > an exhausted daily quota fails at once instead of waiting [17.58ms]
-(pass) Drafting > discarding a draft allows a new one [30.61ms]
+(pass) Drafting > an exhausted daily quota fails at once instead of waiting [20.44ms]
+(pass) Drafting > rerating scores a drafted item on every current aspect, keeping the rest [31.70ms]
+(pass) Drafting > a rerating that misses an aspect is refused and the old ratings stay [28.73ms]
+(pass) Drafting > removing an aspect removes its ratings [28.13ms]
+(pass) Drafting > discarding a draft allows a new one [29.18ms]
 
 tests/concepts/Harvesting.test.ts:
-(pass) Harvesting > principle: each harvest brings the next usable works and never repeats one [33.73ms]
-(pass) Harvesting > a find keeps its source notes and English ISBN as its key [22.79ms]
-(pass) Harvesting > a topic is exhausted once the source runs out, and further harvests are refused [24.36ms]
-(pass) Harvesting > a batch never holds more finds than its size [26.32ms]
-(pass) Harvesting > only one batch runs at a time, unless the running one is over 30 minutes old [5.03ms]
-(pass) Harvesting > a finished batch can't be harvested or finished again [21.57ms]
-(pass) Harvesting > refuses when the source can't be reached [3022.72ms]
+(pass) Harvesting > principle: each harvest brings the next usable works and never repeats one [36.00ms]
+(pass) Harvesting > a find keeps its source notes and English ISBN as its key [30.81ms]
+(pass) Harvesting > a topic is exhausted once the source runs out, and further harvests are refused [32.20ms]
+(pass) Harvesting > a batch never holds more finds than its size [30.70ms]
+(pass) Harvesting > only one batch runs at a time, unless the running one is over 30 minutes old [6.22ms]
+(pass) Harvesting > a finished batch can't be harvested or finished again [26.89ms]
+(pass) Harvesting > refuses when the source can't be reached [3028.03ms]
 
 tests/concepts/Authenticating.test.ts:
-(pass) Authenticating > principle: a registered username authenticates only with its password [58.77ms]
-(pass) Authenticating > an unknown username is refused like a wrong password [3.18ms]
-(pass) Authenticating > refuses malformed usernames and weak passwords [1.44ms]
-(pass) Authenticating > stores a salted verifier, never the password [28.23ms]
+(pass) Authenticating > principle: a registered username authenticates only with its password [68.16ms]
+(pass) Authenticating > an unknown username is refused like a wrong password [3.71ms]
+(pass) Authenticating > refuses malformed usernames and weak passwords [1.55ms]
+(pass) Authenticating > stores a salted verifier, never the password [32.33ms]
 
- 56 pass
+ 74 pass
  0 fail
- 163 expect() calls
-Ran 56 tests across 12 files. [4.49s]
+ 217 expect() calls
+Ran 74 tests across 14 files. [5.35s]

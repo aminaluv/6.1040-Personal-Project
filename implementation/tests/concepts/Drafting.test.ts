@@ -6,6 +6,7 @@ import {
   DraftingConcept,
   NoAspects,
   NoDraft,
+  NoSuchAspect,
 } from "../../src/concepts/Drafting.ts";
 import { completeAnswer, db, fakeWeb, resetDb } from "../helpers.ts";
 
@@ -100,6 +101,44 @@ describe("Drafting", () => {
     await expect(drafting.draft(request)).rejects.toThrow(DraftFailed);
     expect(Date.now() - started).toBeLessThan(2000);
     expect(web.geminiModels).toHaveLength(1);
+  });
+
+  test("rerating scores a drafted item on every current aspect, keeping the rest", async () => {
+    await defineAspects();
+    const { draft } = await drafting.draft(request);
+    await expect(drafting.rerate({ ...request, item: "unknown" })).rejects.toThrow(NoDraft);
+    await drafting.defineAspect({ name: "tone", description: "0 is light, 10 is dark." });
+    web.restore();
+    web = fakeWeb({ answer: (title, aspects) => ({ ratings: aspects.map((aspect) => ({ aspect, value: 7 })) }) });
+    expect(await drafting.rerate(request)).toEqual({ draft });
+    expect(await drafting._ratings({ draft })).toEqual([
+      { aspectName: "pacing", value: 7 },
+      { aspectName: "social-commentary", value: 7 },
+      { aspectName: "tone", value: 7 },
+    ]);
+    expect((await drafting._draft({ item: "the-hobbit" }))[0]?.summary).toBe(
+      "A spoiler-free summary of The Hobbit.",
+    );
+  });
+
+  test("a rerating that misses an aspect is refused and the old ratings stay", async () => {
+    await defineAspects();
+    const { draft } = await drafting.draft(request);
+    const before = await drafting._ratings({ draft });
+    web.restore();
+    web = fakeWeb({ answer: () => ({ ratings: [{ aspect: "pacing", value: 3 }] }) });
+    await expect(drafting.rerate(request)).rejects.toThrow(DraftFailed);
+    expect(await drafting._ratings({ draft })).toEqual(before);
+  });
+
+  test("removing an aspect removes its ratings", async () => {
+    await defineAspects();
+    const { draft } = await drafting.draft(request);
+    expect(await drafting.removeAspect({ name: "pacing" })).toEqual({ name: "pacing" });
+    expect((await drafting._ratings({ draft })).map((r) => r.aspectName)).toEqual([
+      "social-commentary",
+    ]);
+    await expect(drafting.removeAspect({ name: "pacing" })).rejects.toThrow(NoSuchAspect);
   });
 
   test("discarding a draft allows a new one", async () => {

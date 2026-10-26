@@ -6,21 +6,21 @@ const { BookCataloging, Recommending, Sessioning } = concepts;
 
 const CriteriaList = former(
   "every criterion",
-  (_input, { criterion, name, description }) =>
+  (_input, { criterion, name, description, low, high }) =>
     form({
       criteria: each(
-        BookCataloging._criteria({}).is({ criterion, name, description }),
-      ).form({ criterion, name, description }),
+        BookCataloging._criteria({}).is({ criterion, name, description, low, high }),
+      ).form({ criterion, name, description, low, high }),
     }),
 );
 
 const WeightList = former(
-  "the reader's weights",
-  ({ user }, { feature, declared }) =>
+  "the reader's preferences",
+  ({ user }, { feature, importance, target }) =>
     form({
-      weights: each(
-        Recommending._preferences({ user }).is({ feature, declared }),
-      ).form({ criterion: feature, weight: declared }),
+      preferences: each(
+        Recommending._preferences({ user }).is({ feature, importance, target }),
+      ).form({ criterion: feature, importance, target }),
     }),
 );
 
@@ -32,7 +32,7 @@ const View = endpoint(
       .then(
         respond({
           criteria: CriteriaList({}),
-          weights: WeightList({ user }),
+          preferences: WeightList({ user }),
         }),
       ),
   { input: { required: ["session"] } },
@@ -40,16 +40,16 @@ const View = endpoint(
 
 const Weigh = endpoint(
   "/profile/weigh",
-  ({ session, user, criterion, weight }) =>
-    receive({ session, criterion, weight })
+  ({ session, user, criterion, target, importance }) =>
+    receive({ session, criterion, target, importance })
       .then(Sessioning.current({ session }).responds({ subject: user }))
       .then(
-        Recommending.declare({ user, feature: criterion, weight }).responds({
+        Recommending.prefer({ user, feature: criterion, target, importance }).responds({
           feature: criterion,
         }),
       )
-      .then(respond({ criterion, weight })),
-  { input: { required: ["session", "criterion", "weight"] } },
+      .then(respond({ criterion, target, importance })),
+  { input: { required: ["session", "criterion", "target", "importance"] } },
 );
 
 export const composition = { CriteriaList, WeightList, View, Weigh };

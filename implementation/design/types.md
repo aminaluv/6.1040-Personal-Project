@@ -25,6 +25,9 @@ instantiate Recommending with
   Item is BookCataloging.Book
   Feature is BookCataloging.Criterion
 
+instantiate Following with
+  User is Authenticating.Account
+
 instantiate Harvesting
 
 instantiate Drafting with

@@ -3,7 +3,14 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#FBF7EC" />
     <title>Novelty</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Slabo+27px&family=Sofia+Sans:wght@400;500;600;700&display=swap"
+    />
     <link rel="stylesheet" href="./styles.css" />
     <script type="module" src="./app.ts"></script>
   </head>
@@ -24,58 +31,118 @@
       </a>
     </header>
 
-    <form id="auth" hidden>
-      <h2>Sign in to start swiping</h2>
-      <label>Username <input id="username" autocomplete="username" required /></label>
-      <label>
-        Password
+    <form id="auth" class="panel auth" hidden>
+      <p class="eyebrow">Welcome to</p>
+      <h2 class="wordmark">Novelty</h2>
+      <p class="lede">Swipe through first impressions of books and find the next one you'll finish.</p>
+      <label class="field">
+        <span>Username</span>
+        <input id="username" autocomplete="username" required />
+      </label>
+      <label class="field">
+        <span>Password</span>
         <input id="password" type="password" autocomplete="current-password" required />
       </label>
+      <p id="auth-status" class="form-error" role="alert"></p>
       <div class="actions">
-        <button type="submit" data-mode="sign-in">Sign in</button>
-        <button type="submit" data-mode="register">Create account</button>
+        <button type="submit" class="btn primary" data-mode="sign-in">Sign in</button>
+        <button type="submit" class="btn ghost" data-mode="register">Create account</button>
       </div>
-      <p id="auth-status" role="alert"></p>
     </form>
 
     <main id="app" hidden>
-      <section id="feed-view" data-view="feed">
+      <section id="feed-view" class="view" data-view="feed">
         <div id="deck" aria-live="polite"></div>
-        <nav>
-          <button id="pass">✕ Pass</button>
-          <button id="like">Up Next ♥</button>
+        <nav class="swipe-actions" aria-label="Decide on this book">
+          <button id="pass" class="round pass" aria-label="Pass" title="Pass (←)">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+          </button>
+          <button id="like" class="round like" aria-label="Add to Up Next" title="Up Next (→)">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 20s-7-4.4-9.2-8.6C1.3 8.5 3 5 6.4 5c2 0 3.6 1.2 4.4 2.6h2.4C14 6.2 15.6 5 17.6 5 21 5 22.7 8.5 21.2 11.4 19 15.6 12 20 12 20z" />
+            </svg>
+          </button>
         </nav>
-        <section id="debug" hidden>
+        <p class="hint">Drag the card, or use ← and → on your keyboard.</p>
+        <section id="debug" class="panel" hidden>
           <h3>Feed order (debug)</h3>
           <ol id="debug-list"></ol>
         </section>
-        <p id="status"></p>
       </section>
 
-      <section id="shelves-view" data-view="shelves" hidden>
-        <h2>Your shelves</h2>
-        <div id="tabs">
-          <button data-shelf="UP_NEXT" aria-pressed="true">Up Next</button>
-          <button data-shelf="FAVORITES" aria-pressed="false">Favorites</button>
-          <button data-shelf="PASSED" aria-pressed="false">Passed</button>
+      <section id="shelves-view" class="view" data-view="shelves" hidden>
+        <h2 class="page-title">Your shelves</h2>
+        <div id="tabs" class="segmented" role="group" aria-label="Shelf">
+          <button data-shelf="UP_NEXT" aria-pressed="true">Up Next <span class="tab-count" data-count="UP_NEXT"></span></button>
+          <button data-shelf="FINISHED" aria-pressed="false">Finished <span class="tab-count" data-count="FINISHED"></span></button>
+          <button data-shelf="FAVORITES" aria-pressed="false">Favorites <span class="tab-count" data-count="FAVORITES"></span></button>
+          <button data-shelf="PASSED" aria-pressed="false">Passed <span class="tab-count" data-count="PASSED"></span></button>
         </div>
-        <ul id="shelf"></ul>
+        <ul id="shelf" class="book-list"></ul>
       </section>
 
-      <section id="profile-view" data-view="profile" hidden>
-        <h2>Your profile</h2>
-        <p>
-          Signed in as <strong id="who"></strong>
-          <button id="sign-out">Sign out</button>
-        </p>
-        <h3>Your criteria</h3>
-        <p>
-          Weight what matters to you, from 0 (not at all) to 5. Criteria above 0 appear on each
-          book's radar and count toward your feed's ranking.
-        </p>
-        <ul id="criteria"></ul>
-        <p id="profile-status" role="status"></p>
+      <section id="profile-view" class="view" data-view="profile" hidden>
+        <div class="panel identity">
+          <span id="my-avatar" class="avatar large" aria-hidden="true"></span>
+          <div>
+            <h2 id="who" class="page-title"></h2>
+            <div class="identity-meta">
+              <span class="muted">Signed in</span>
+              <button id="sign-out" class="btn ghost small">Sign out</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>Friends</h3>
+          <form id="follow-form" class="inline-form">
+            <label class="field">
+              <span>Follow a reader</span>
+              <input id="follow-username" placeholder="Their username" autocomplete="off" required />
+            </label>
+            <button type="submit" class="btn primary">Follow</button>
+          </form>
+          <p id="friends-status" class="form-error" role="status"></p>
+          <div class="people">
+            <div>
+              <h4>Following <span id="following-count" class="count">0</span></h4>
+              <ul id="following-list" class="person-list"></ul>
+            </div>
+            <div>
+              <h4>Followers <span id="followers-count" class="count">0</span></h4>
+              <ul id="followers-list" class="person-list"></ul>
+            </div>
+          </div>
+        </div>
+        <div id="criteria-panel" class="panel">
+          <h3>What you like in a book</h3>
+          <p class="muted">
+            Each quality runs between two ends. Slide to where you like books to be, then choose how
+            much it matters. Anything that matters shows on every book's radar, next to your ideal,
+            and shapes the order of your feed.
+          </p>
+          <ul id="criteria" class="criteria"></ul>
+        </div>
+
+        <p id="profile-status" class="visually-hidden" role="status"></p>
+      </section>
+
+      <section id="reader-view" class="view" data-view="reader" hidden>
+        <div class="panel identity">
+          <span id="reader-avatar" class="avatar large" aria-hidden="true"></span>
+          <div>
+            <h2 id="reader-name" class="page-title"></h2>
+            <div class="identity-meta">
+              <div id="reader-network" class="network"></div>
+              <button id="reader-follow" class="btn primary small" hidden></button>
+            </div>
+          </div>
+        </div>
+        <p id="reader-status" class="form-error" role="status"></p>
+        <div id="reader-shelves"></div>
       </section>
     </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
   </body>
 </html>

@@ -10,6 +10,8 @@ import { composition as catalog } from "./compositions/Catalog.ts";
 import { composition as growing } from "./compositions/Growing.ts";
 import { composition as sessions } from "./compositions/Sessions.ts";
 import { composition as profile } from "./compositions/Profile.ts";
+import { composition as friends } from "./compositions/Friends.ts";
+import { FollowingConcept } from "./concepts/Following.ts";
 import { AuthenticatingConcept } from "./concepts/Authenticating.ts";
 import { SessioningConcept } from "./concepts/Sessioning.ts";
 import { HarvestingConcept } from "./concepts/Harvesting.ts";
@@ -22,6 +24,7 @@ export function assembleApplication() {
     instances: {
       Authenticating: new AuthenticatingConcept(db),
       Sessioning: new SessioningConcept(db),
+      Following: new FollowingConcept(db),
       Shelving: new ShelvingConcept(db),
       BookCataloging: new BookCatalogingConcept(db),
       Swiping: new SwipingConcept(db),
@@ -36,6 +39,7 @@ export function assembleApplication() {
       Growing: growing,
       Sessions: sessions,
       Profile: profile,
+      Friends: friends,
     },
     rawFaultReporter: ({ error }) => console.error(error),
   });

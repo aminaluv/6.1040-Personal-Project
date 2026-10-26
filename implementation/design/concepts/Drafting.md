@@ -8,12 +8,13 @@ ever left half-described.
 
 ## Principle
 
-The aspects social-commentary and pacing are defined. A draft is requested for The Hobbit with
-its title, author and source notes. The agent writes a spoiler-free summary, a setting, the
-main and supporting characters with their age ranges, the themes and tones, and a rating from
-0 to 10 on social-commentary and on pacing. Reading the draft gives everything needed to
-describe the book. A request the agent can't answer completely is refused, so a partial draft
-never exists.
+The aspects pace (from a slow burn at 0 to a page-turner at 10) and tone (from light and cozy
+to dark and intense) are defined. A draft is requested for The Hobbit with its title, author and
+source notes. The agent writes a spoiler-free summary, a setting, the main and supporting
+characters with their age ranges, the themes and tones, and a rating from 0 to 10 on pace and on
+tone. Reading the draft gives everything needed to describe the book. A request the agent can't
+answer completely is refused, so a partial draft never exists. When an aspect is added later,
+rerating the draft scores it on every aspect again without rewriting the rest.
 
 ## Types
 
@@ -80,6 +81,27 @@ draft(item: Item, title: String, author: String, source: String) : returns (draf
     add a new draft for item with the agent's summary, setting, themes and tones
     add a figure of the draft for each character, and a rating of the draft for each aspect
     returns draft
+
+rerate(item: Item, title: String, author: String, source: String) : returns (draft: Draft)
+  where item has no draft
+  then
+    refuses NO_DRAFT "That item has no draft."
+  where item has a draft, and the agent can't be reached or its answer lacks a valid rating for some aspect
+  then
+    refuses DRAFT_FAILED "The agent couldn't rate every aspect."
+  where item has a draft and the agent rates every aspect
+  then
+    replace the ratings of the item's draft with the agent's rating for each aspect
+    returns draft
+
+removeAspect(name: String) : returns (name: String)
+  where no aspect has name
+  then
+    refuses NO_SUCH_ASPECT "There is no aspect with that name."
+  where an aspect has name
+  then
+    remove every rating on that aspect, then remove the aspect
+    returns name
 
 discard(item: Item) : returns (item: Item)
   where item has no draft

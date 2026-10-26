@@ -6,10 +6,11 @@ Give readers a clear, consistent, and rich description of every book (who it's a
 
 ## Principle
 
-A reader defines the criterion social-commentary and adds brave_new_world with its title,
-author and cover. Once it's described with a spoiler-free summary, setting, characters,
-themes and tones, and scored 9 on social-commentary, a reader looking at it can see what the
-book is about and how strongly it delivers social commentary.
+A reader defines the criterion pace, running from a slow burn at 0 to a page-turner at 10, and
+adds brave_new_world with its title, author and cover. Once it's described with a spoiler-free
+summary, setting, characters, themes and tones, and scored 5 on pace, a reader looking at it
+can see what the book is about and that it sits midway between a slow burn and a
+page-turner.
 
 ## Types
 
@@ -25,6 +26,8 @@ Role is MAIN or SUPPORTING
 a set of Criteria with
   a unique name String
   a description String
+  a low String
+  a high String
 
 a set of Books with
   a unique isbn String
@@ -57,14 +60,24 @@ a set of Scores with
 ## Actions
 
 ```actions
-defineCriterion(name: String, description: String) : returns (criterion: Criterion)
+defineCriterion(name: String, description: String, low: String, high: String) : returns (criterion: Criterion)
   where a criterion already has name
   then
     refuses CRITERION_EXISTS "A criterion with that name already exists."
   where no criterion has name
   then
-    add a new criterion with name and description
+    add a new criterion with name, description, and low and high as the meanings of 0 and 10
     returns criterion
+
+removeCriterion(criterion: Criterion) : returns (name: String)
+  where criterion is not in Criteria
+  then
+    refuses NO_SUCH_CRITERION "There is no such criterion."
+  where criterion is in Criteria
+  then
+    bind name to the name of criterion
+    remove every score on criterion, then remove criterion
+    returns name
 
 addBook(isbn: String, title: String, author: String, published: Date, pageCount: Number, coverUrl: String) : returns (book: Book)
   where a book already has isbn
@@ -157,7 +170,7 @@ resetDescription(book: Book) : returns (book: Book)
 _described() : many (book: Book, title: String, author: String, coverUrl: String)
   Answers every DESCRIBED book, ordered by title, and no rows when there are none.
 
-_book(book: Book) : optional (title: String, author: String, published: Date, pageCount: Number, coverUrl: String, summary: String, setting: String)
+_book(book: Book) : optional (isbn: String, title: String, author: String, published: Date, pageCount: Number, coverUrl: String, summary: String, setting: String)
   Answers the book's details, with empty text for a missing summary or setting, and no row
   when the book is unknown.
 
@@ -173,10 +186,11 @@ _tones(book: Book) : many (tone: String)
 _characters(book: Book) : many (name: String, role: Role, minAge: Number, maxAge: Number)
   Answers each character of the book, MAIN characters first, then by name.
 
-_scores(book: Book) : many (criterion: Criterion, criterionName: String, value: Number)
-  Answers each score of the book with its criterion's name, ordered by that name.
+_scores(book: Book) : many (criterion: Criterion, criterionName: String, low: String, high: String, value: Number)
+  Answers each score of the book with its criterion's name and the meanings of its two ends,
+  ordered by name.
 
-_criteria() : many (criterion: Criterion, name: String, description: String)
+_criteria() : many (criterion: Criterion, name: String, description: String, low: String, high: String)
   Answers every criterion, ordered by name, and no rows when there are none.
 
 _criterionByName(name: String) : optional (criterion: Criterion)

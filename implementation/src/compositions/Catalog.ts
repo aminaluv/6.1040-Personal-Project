@@ -40,6 +40,8 @@ const FirstImpression = former(
       maxAge,
       criterion,
       criterionName,
+      low,
+      high,
       value,
     },
   ) =>
@@ -75,11 +77,15 @@ const FirstImpression = former(
         BookCataloging._scores({ book }).is({
           criterion,
           criterionName,
+          low,
+          high,
           value,
         }),
       ).form({
         criterion,
         criterionName,
+        low,
+        high,
         value,
       }),
       genres: each(BookCataloging._genres({ book }).is({ genre })).form({

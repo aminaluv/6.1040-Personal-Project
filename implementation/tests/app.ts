@@ -31,7 +31,13 @@ export async function signUp(client: Client, username: string) {
   return result.session;
 }
 
-export const CRITERIA = ["pacing", "social-commentary", "whimsy"] as const;
+// Each criterion is a scale between two ends, as in scripts/books.ts.
+export const CRITERIA = ["pace", "tone", "humor"] as const;
+const ENDS: Record<(typeof CRITERIA)[number], [string, string]> = {
+  pace: ["slow burn", "page-turner"],
+  tone: ["light and cozy", "dark and intense"],
+  humor: ["serious", "funny"],
+};
 
 /**
  * Seeds a small described catalog the way scripts/seed.ts and sync-features.ts do: criteria
@@ -45,11 +51,10 @@ export async function seedCatalog(
   const recommending = new RecommendingConcept(db);
   const criteria: Record<string, string> = {};
   for (const name of CRITERIA) {
-    ({ criterion: criteria[name] } = await catalog.defineCriterion({
-      name,
-      description: `How much the book offers ${name}.`,
-    }));
-    await drafting.defineAspect({ name, description: `How much the book offers ${name}.` });
+    const [low, high] = ENDS[name];
+    const description = `0 is ${low}, 10 is ${high}.`;
+    ({ criterion: criteria[name] } = await catalog.defineCriterion({ name, description, low, high }));
+    await drafting.defineAspect({ name, description });
   }
   const ids: Record<string, string> = {};
   for (const b of books) {

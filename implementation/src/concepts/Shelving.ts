@@ -3,7 +3,7 @@ import { MongoServerError, type Collection, type Db } from "mongodb";
 export class AlreadyShelved extends Error {}
 export class NotShelved extends Error {}
 
-type ShelfName = "UP_NEXT" | "FAVORITES";
+type ShelfName = "UP_NEXT" | "FINISHED" | "FAVORITES";
 
 interface Placement {
   _id: string;

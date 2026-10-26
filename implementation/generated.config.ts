@@ -16,6 +16,7 @@ export default {
       new URL("./design/compositions/Growing.md", import.meta.url),
       new URL("./design/compositions/Sessions.md", import.meta.url),
       new URL("./design/compositions/Profile.md", import.meta.url),
+      new URL("./design/compositions/Friends.md", import.meta.url),
     ],
   },
   projections: [httpWire({ policy, name: "NoveltyWireHttp" })],

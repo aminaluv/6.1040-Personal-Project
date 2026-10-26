@@ -83,6 +83,8 @@ export type NoveltyWire = {
         "scores": {
           "criterion": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_scores"]>>>, ["criterion"]>>;
           "criterionName": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_scores"]>>>, ["criterionName"]>>;
+          "high": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_scores"]>>>, ["high"]>>;
+          "low": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_scores"]>>>, ["low"]>>;
           "value": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_scores"]>>>, ["value"]>>;
         }[];
         "themes": {
@@ -176,6 +178,93 @@ export type NoveltyWire = {
     };
     error: { error: AppWideError | "INVALID_INPUT" | "NOT_SWIPED" | "UNKNOWN_SESSION" };
   };
+  "/friends/follow": {
+    input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
+      "username": Jsonify<OneOf<[AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Following"]["follow"]>[0], ["followee"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Following"]["follow"]>>, ["followee"]>]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Authenticating"]["_registered"]>[0], ["username"]>]>>;
+    };
+    output: {
+      "username": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Following"]["follow"]>[0], ["followee"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Following"]["follow"]>>, ["followee"]>]>>;
+    };
+    error: { error: AppWideError | "ALREADY_FOLLOWING" | "INVALID_INPUT" | "NO_SUCH_READER" | "SELF_FOLLOW" | "UNKNOWN_SESSION" };
+  };
+  "/friends/mine": {
+    input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
+    };
+    output: {
+      "followers": {
+        "people": {
+          "username": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Following"]["_followers"]>>>, ["follower"]>>;
+        }[];
+      };
+      "following": {
+        "people": {
+          "username": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Following"]["_following"]>>>, ["followee"]>>;
+        }[];
+      };
+    };
+    error: { error: AppWideError | "INVALID_INPUT" | "UNKNOWN_SESSION" };
+  };
+  "/friends/reader": {
+    input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
+      "username": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Authenticating"]["_registered"]>[0], ["username"]>>;
+    };
+    output: {
+      "favorites": {
+        "items": {
+          "item": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Shelving"]["_shelf"]>>>, ["item"]>>;
+        }[];
+      };
+      "finished": {
+        "items": {
+          "item": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Shelving"]["_shelf"]>>>, ["item"]>>;
+        }[];
+      };
+      "followedByYou": true;
+      "followers": {
+        "people": {
+          "username": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Following"]["_followers"]>>>, ["follower"]>>;
+        }[];
+      };
+      "following": {
+        "people": {
+          "username": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Following"]["_following"]>>>, ["followee"]>>;
+        }[];
+      };
+      "upNext": {
+        "items": {
+          "item": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Shelving"]["_shelf"]>>>, ["item"]>>;
+        }[];
+      };
+      "username": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Authenticating"]["_registered"]>[0], ["username"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Following"]["_isFollowing"]>[0], ["followee"]>]>>;
+    } | {
+      "followedByYou": false;
+      "followers": {
+        "people": {
+          "username": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Following"]["_followers"]>>>, ["follower"]>>;
+        }[];
+      };
+      "following": {
+        "people": {
+          "username": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Following"]["_following"]>>>, ["followee"]>>;
+        }[];
+      };
+      "username": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Authenticating"]["_registered"]>[0], ["username"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Following"]["_isFollowing"]>[0], ["followee"]>]>>;
+    };
+    error: { error: AppWideError | "INVALID_INPUT" | "NO_SUCH_READER" | "UNKNOWN_SESSION" };
+  };
+  "/friends/unfollow": {
+    input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
+      "username": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Following"]["unfollow"]>[0], ["followee"]>>;
+    };
+    output: {
+      "username": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Following"]["unfollow"]>[0], ["followee"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Following"]["unfollow"]>>, ["followee"]>]>>;
+    };
+    error: { error: AppWideError | "INVALID_INPUT" | "NOT_FOLLOWING" | "UNKNOWN_SESSION" };
+  };
   "/profile/view": {
     input: {
       "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
@@ -185,13 +274,16 @@ export type NoveltyWire = {
         "criteria": {
           "criterion": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_criteria"]>>>, ["criterion"]>>;
           "description": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_criteria"]>>>, ["description"]>>;
+          "high": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_criteria"]>>>, ["high"]>>;
+          "low": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_criteria"]>>>, ["low"]>>;
           "name": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_criteria"]>>>, ["name"]>>;
         }[];
       };
-      "weights": {
-        "weights": {
+      "preferences": {
+        "preferences": {
           "criterion": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["_preferences"]>>>, ["feature"]>>;
-          "weight": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["_preferences"]>>>, ["declared"]>>;
+          "importance": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["_preferences"]>>>, ["importance"]>>;
+          "target": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["_preferences"]>>>, ["target"]>>;
         }[];
       };
     };
@@ -199,15 +291,17 @@ export type NoveltyWire = {
   };
   "/profile/weigh": {
     input: {
-      "criterion": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["declare"]>[0], ["feature"]>>;
+      "criterion": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["prefer"]>[0], ["feature"]>>;
+      "importance": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["prefer"]>[0], ["importance"]>>;
       "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
-      "weight": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["declare"]>[0], ["weight"]>>;
+      "target": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["prefer"]>[0], ["target"]>>;
     };
     output: {
-      "criterion": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["declare"]>[0], ["feature"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["declare"]>>, ["feature"]>]>>;
-      "weight": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["declare"]>[0], ["weight"]>>;
+      "criterion": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["prefer"]>[0], ["feature"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["prefer"]>>, ["feature"]>]>>;
+      "importance": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["prefer"]>[0], ["importance"]>>;
+      "target": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["prefer"]>[0], ["target"]>>;
     };
-    error: { error: AppWideError | "INVALID_INPUT" | "INVALID_WEIGHT" | "UNKNOWN_SESSION" };
+    error: { error: AppWideError | "INVALID_IMPORTANCE" | "INVALID_INPUT" | "INVALID_TARGET" | "UNKNOWN_SESSION" };
   };
   "/shelves/add": {
     input: {
@@ -319,6 +413,8 @@ export type NoveltyWireHttp = {
         "scores": {
           "criterion": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_scores"]>>>, ["criterion"]>>;
           "criterionName": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_scores"]>>>, ["criterionName"]>>;
+          "high": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_scores"]>>>, ["high"]>>;
+          "low": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_scores"]>>>, ["low"]>>;
           "value": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_scores"]>>>, ["value"]>>;
         }[];
         "themes": {
@@ -412,6 +508,93 @@ export type NoveltyWireHttp = {
     };
     error: { error: HttpAppWideError | "INVALID_REQUEST" | "NOT_FOUND" | "UNAUTHORIZED" };
   };
+  "/friends/follow": {
+    input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
+      "username": Jsonify<OneOf<[AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Following"]["follow"]>[0], ["followee"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Following"]["follow"]>>, ["followee"]>]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Authenticating"]["_registered"]>[0], ["username"]>]>>;
+    };
+    output: {
+      "username": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Following"]["follow"]>[0], ["followee"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Following"]["follow"]>>, ["followee"]>]>>;
+    };
+    error: { error: HttpAppWideError | "CONFLICT" | "INVALID_REQUEST" | "NOT_FOUND" | "UNAUTHORIZED" };
+  };
+  "/friends/mine": {
+    input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
+    };
+    output: {
+      "followers": {
+        "people": {
+          "username": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Following"]["_followers"]>>>, ["follower"]>>;
+        }[];
+      };
+      "following": {
+        "people": {
+          "username": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Following"]["_following"]>>>, ["followee"]>>;
+        }[];
+      };
+    };
+    error: { error: HttpAppWideError | "INVALID_REQUEST" | "UNAUTHORIZED" };
+  };
+  "/friends/reader": {
+    input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
+      "username": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Authenticating"]["_registered"]>[0], ["username"]>>;
+    };
+    output: {
+      "favorites": {
+        "items": {
+          "item": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Shelving"]["_shelf"]>>>, ["item"]>>;
+        }[];
+      };
+      "finished": {
+        "items": {
+          "item": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Shelving"]["_shelf"]>>>, ["item"]>>;
+        }[];
+      };
+      "followedByYou": true;
+      "followers": {
+        "people": {
+          "username": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Following"]["_followers"]>>>, ["follower"]>>;
+        }[];
+      };
+      "following": {
+        "people": {
+          "username": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Following"]["_following"]>>>, ["followee"]>>;
+        }[];
+      };
+      "upNext": {
+        "items": {
+          "item": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Shelving"]["_shelf"]>>>, ["item"]>>;
+        }[];
+      };
+      "username": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Authenticating"]["_registered"]>[0], ["username"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Following"]["_isFollowing"]>[0], ["followee"]>]>>;
+    } | {
+      "followedByYou": false;
+      "followers": {
+        "people": {
+          "username": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Following"]["_followers"]>>>, ["follower"]>>;
+        }[];
+      };
+      "following": {
+        "people": {
+          "username": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Following"]["_following"]>>>, ["followee"]>>;
+        }[];
+      };
+      "username": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Authenticating"]["_registered"]>[0], ["username"]>, AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Following"]["_isFollowing"]>[0], ["followee"]>]>>;
+    };
+    error: { error: HttpAppWideError | "INVALID_REQUEST" | "NOT_FOUND" | "UNAUTHORIZED" };
+  };
+  "/friends/unfollow": {
+    input: {
+      "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
+      "username": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Following"]["unfollow"]>[0], ["followee"]>>;
+    };
+    output: {
+      "username": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Following"]["unfollow"]>[0], ["followee"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Following"]["unfollow"]>>, ["followee"]>]>>;
+    };
+    error: { error: HttpAppWideError | "INVALID_REQUEST" | "NOT_FOUND" | "UNAUTHORIZED" };
+  };
   "/profile/view": {
     input: {
       "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
@@ -421,13 +604,16 @@ export type NoveltyWireHttp = {
         "criteria": {
           "criterion": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_criteria"]>>>, ["criterion"]>>;
           "description": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_criteria"]>>>, ["description"]>>;
+          "high": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_criteria"]>>>, ["high"]>>;
+          "low": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_criteria"]>>>, ["low"]>>;
           "name": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["BookCataloging"]["_criteria"]>>>, ["name"]>>;
         }[];
       };
-      "weights": {
-        "weights": {
+      "preferences": {
+        "preferences": {
           "criterion": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["_preferences"]>>>, ["feature"]>>;
-          "weight": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["_preferences"]>>>, ["declared"]>>;
+          "importance": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["_preferences"]>>>, ["importance"]>>;
+          "target": Jsonify<AtPath<QueryRow<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["_preferences"]>>>, ["target"]>>;
         }[];
       };
     };
@@ -435,13 +621,15 @@ export type NoveltyWireHttp = {
   };
   "/profile/weigh": {
     input: {
-      "criterion": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["declare"]>[0], ["feature"]>>;
+      "criterion": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["prefer"]>[0], ["feature"]>>;
+      "importance": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["prefer"]>[0], ["importance"]>>;
       "session": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Sessioning"]["current"]>[0], ["session"]>>;
-      "weight": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["declare"]>[0], ["weight"]>>;
+      "target": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["prefer"]>[0], ["target"]>>;
     };
     output: {
-      "criterion": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["declare"]>[0], ["feature"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["declare"]>>, ["feature"]>]>>;
-      "weight": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["declare"]>[0], ["weight"]>>;
+      "criterion": Jsonify<AllOf<[AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["prefer"]>[0], ["feature"]>, AtPath<Awaited<ReturnType<(typeof ApplicationConceptSet.concepts)["Recommending"]["prefer"]>>, ["feature"]>]>>;
+      "importance": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["prefer"]>[0], ["importance"]>>;
+      "target": Jsonify<AtPath<Parameters<(typeof ApplicationConceptSet.concepts)["Recommending"]["prefer"]>[0], ["target"]>>;
     };
     error: { error: HttpAppWideError | "INVALID_REQUEST" | "UNAUTHORIZED" };
   };

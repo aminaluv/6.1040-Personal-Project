@@ -11,9 +11,9 @@ const catalog = new BookCatalogingConcept(db);
 const drafting = new DraftingConcept(db);
 const criterionIds = new Map<string, string>();
 
-for (const { name, description } of criteria) {
+for (const { name, description, low, high } of criteria) {
   try {
-    const { criterion } = await catalog.defineCriterion({ name, description });
+    const { criterion } = await catalog.defineCriterion({ name, description, low, high });
     criterionIds.set(name, criterion);
   } catch (error) {
     if (!(error instanceof CriterionExists)) throw error;

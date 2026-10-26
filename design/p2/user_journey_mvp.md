@@ -18,6 +18,5 @@ Jane never has to stand in front of a library shelf feeling lost and overwhelmed
 
 ### MVP Demo
 
-<video src="./mvp_demo.mov" controls="controls" width="500" height="320">
-  Your browser does not support the video tag.
-</video>
+https://drive.google.com/file/d/18VW0wxWdoDxm2khsY1ZidhexZvLRYbQi/view?usp=sharing
+

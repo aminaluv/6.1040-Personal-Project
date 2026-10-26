@@ -2,14 +2,15 @@
 
 ## Purpose
 
-Keep the books a reader means to read or loved in named shelves, so an interesting book is
-never lost track of.
+Keep the books a reader means to read, has read, or loved in named shelves, so an interesting
+book is never lost track of and a finished one is remembered.
 
 ## Principle
 
 Jane puts brave-new-world on her UP_NEXT shelf, then klara-and-the-sun. Her UP_NEXT shelf
 shows both. After she finishes brave-new-world, she removes it from UP_NEXT and adds it to
-FAVORITES, and each shelf shows only what she put there.
+FINISHED. She loved it, so she also adds it to FAVORITES, while klara-and-the-sun, once
+finished, goes only on FINISHED. Each shelf shows only what she put there.
 
 ## Types
 
@@ -20,7 +21,7 @@ external User
 external Item
   The thing placed on a shelf, such as a book.
 
-ShelfName is UP_NEXT or FAVORITES
+ShelfName is UP_NEXT or FINISHED or FAVORITES
 ```
 
 ## State

@@ -16,6 +16,8 @@ interface CriterionDoc {
   _id: string;
   name: string;
   description: string;
+  low: string; // what a 0 means
+  high: string; // what a 10 means
 }
 interface BookDoc {
   _id: string;
@@ -86,20 +88,32 @@ export class BookCatalogingConcept {
   async defineCriterion({
     name,
     description,
+    low,
+    high,
   }: {
     name: string;
     description: string;
+    low: string;
+    high: string;
   }) {
     await ensureIndexes(this.c);
     const criterion = crypto.randomUUID();
     try {
-      await this.c.criteria.insertOne({ _id: criterion, name, description });
+      await this.c.criteria.insertOne({ _id: criterion, name, description, low, high });
     } catch (error) {
       if (isDuplicateKey(error))
         throw new CriterionExists("A criterion with that name already exists.");
       throw error;
     }
     return { criterion };
+  }
+
+  async removeCriterion({ criterion }: { criterion: string }) {
+    const c = await this.c.criteria.findOne({ _id: criterion });
+    if (!c) throw new NoSuchCriterion("There is no such criterion.");
+    await this.c.scores.deleteMany({ criterion });
+    await this.c.criteria.deleteOne({ _id: criterion });
+    return { name: c.name };
   }
 
   async addBook(input: {
@@ -285,9 +299,10 @@ export class BookCatalogingConcept {
   async _book({ book }: { book: string }) {
     const b = await this.c.books.findOne({ _id: book });
     if (!b) return [];
-    const { title, author, published, pageCount, coverUrl } = b;
+    const { isbn, title, author, published, pageCount, coverUrl } = b;
     return [
       {
+        isbn,
         title,
         author,
         published,
@@ -332,11 +347,13 @@ export class BookCatalogingConcept {
     const criteria = await this.c.criteria
       .find({ _id: { $in: scores.map((s) => s.criterion) } })
       .toArray();
-    const names = new Map(criteria.map((c) => [c._id, c.name]));
+    const byId = new Map(criteria.map((c) => [c._id, c]));
     return scores
       .map(({ criterion, value }) => ({
         criterion,
-        criterionName: names.get(criterion) ?? "",
+        criterionName: byId.get(criterion)?.name ?? "",
+        low: byId.get(criterion)?.low ?? "",
+        high: byId.get(criterion)?.high ?? "",
         value,
       }))
       .sort((a, b) => a.criterionName.localeCompare(b.criterionName));
@@ -349,10 +366,12 @@ export class BookCatalogingConcept {
 
   async _criteria(_input: Record<string, never>) {
     const rows = await this.c.criteria.find().sort({ name: 1 }).toArray();
-    return rows.map(({ _id, name, description }) => ({
+    return rows.map(({ _id, name, description, low, high }) => ({
       criterion: _id,
       name,
       description,
+      low: low ?? "",
+      high: high ?? "",
     }));
   }
 

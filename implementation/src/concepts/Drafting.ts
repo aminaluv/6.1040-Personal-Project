@@ -5,6 +5,7 @@ export class AlreadyDrafted extends Error {}
 export class NoAspects extends Error {}
 export class DraftFailed extends Error {}
 export class NoDraft extends Error {}
+export class NoSuchAspect extends Error {}
 
 type Role = "MAIN" | "SUPPORTING";
 
@@ -124,6 +125,7 @@ Write, without spoilers past the first act:
 - themes: 3 short lowercase phrases.
 - tones: 2 short lowercase words or phrases.
 - ratings: a whole number from 0 to 10 for EVERY aspect below, using the aspect's exact name.
+  Each aspect is a scale between two ends, described below; rate where the book falls on it.
 
 Aspects:
 ${aspects.map((a) => `- ${a.name}: ${a.description}`).join("\n")}
@@ -132,7 +134,39 @@ Use your own knowledge of the book where the notes are thin. If you don't recogn
 base everything on the notes rather than inventing a different book.`;
 }
 
-async function ask(text: string): Promise<Answer> {
+// Rating a book on the aspects alone, for rerating a book that's already drafted.
+const RATINGS_SCHEMA = {
+  type: "OBJECT",
+  properties: { ratings: SCHEMA.properties.ratings },
+  required: ["ratings"],
+};
+
+function ratingsPrompt(title: string, author: string, source: string, aspects: AspectDoc[]) {
+  return `You are rating a book for a book recommendation app.
+
+Book: "${title}" by ${author}
+Source notes (from Open Library, may be thin or empty): ${source}
+
+For EVERY aspect below, give a whole number from 0 to 10 for where the book falls on that
+aspect's scale, using the aspect's exact name. Use your own knowledge of the book where the
+notes are thin.
+
+Aspects:
+${aspects.map((a) => `- ${a.name}: ${a.description}`).join("\n")}`;
+}
+
+// Keeps the valid ratings, and says nothing unless every aspect has one.
+function ratingsFor(answer: Pick<Answer, "ratings">, aspects: AspectDoc[]) {
+  const value = new Map(
+    (answer.ratings ?? [])
+      .filter((r) => Number.isInteger(r.value) && r.value >= 0 && r.value <= 10)
+      .map((r) => [r.aspect?.trim(), r.value]),
+  );
+  if (aspects.some((a) => !value.has(a.name))) return undefined;
+  return aspects.map((a) => ({ aspect: a._id, value: value.get(a.name)! }));
+}
+
+async function ask<T = Answer>(text: string, schema: object = SCHEMA): Promise<T> {
   const key = process.env.GOOGLE_GEMINI_API;
   if (!key) throw new Error("GOOGLE_GEMINI_API is not set.");
   let model = MODEL;
@@ -149,7 +183,7 @@ async function ask(text: string): Promise<Answer> {
           contents: [{ role: "user", parts: [{ text }] }],
           generationConfig: {
             responseMimeType: "application/json",
-            responseSchema: SCHEMA,
+            responseSchema: schema,
             temperature: 0.4,
           },
         }),
@@ -161,7 +195,7 @@ async function ask(text: string): Promise<Answer> {
       };
       const reply = data.candidates?.[0]?.content?.parts?.[0]?.text;
       if (!reply) throw new Error("Gemini gave an empty answer.");
-      return JSON.parse(reply) as Answer;
+      return JSON.parse(reply) as T;
     }
     // Rate limits and overloads are worth waiting out; anything else isn't.
     if (attempt === 4 || ![429, 500, 503].includes(response.status))
@@ -198,11 +232,7 @@ function complete(answer: Answer, aspects: AspectDoc[]) {
       ch.minAge >= 0 &&
       ch.minAge <= ch.maxAge,
   );
-  const value = new Map(
-    (answer.ratings ?? [])
-      .filter((r) => Number.isInteger(r.value) && r.value >= 0 && r.value <= 10)
-      .map((r) => [r.aspect?.trim(), r.value]),
-  );
+  const ratings = ratingsFor(answer, aspects);
   const themes = clean(answer.themes ?? []);
   const tones = clean(answer.tones ?? []);
   const summary = answer.summary?.trim();
@@ -211,7 +241,7 @@ function complete(answer: Answer, aspects: AspectDoc[]) {
     characters.length === 0 ||
     themes.length === 0 ||
     tones.length === 0 ||
-    aspects.some((a) => !value.has(a.name))
+    !ratings
   )
     return undefined;
   return {
@@ -220,7 +250,7 @@ function complete(answer: Answer, aspects: AspectDoc[]) {
     characters,
     themes,
     tones,
-    ratings: aspects.map((a) => ({ aspect: a._id, value: value.get(a.name)! })),
+    ratings,
   };
 }
 
@@ -313,6 +343,45 @@ export class DraftingConcept {
       })),
     );
     return { draft };
+  }
+
+  async rerate({
+    item,
+    title,
+    author,
+    source,
+  }: {
+    item: string;
+    title: string;
+    author: string;
+    source: string;
+  }) {
+    const d = await this.c.drafts.findOne({ item });
+    if (!d) throw new NoDraft("That item has no draft.");
+    const aspects = await this.c.aspects.find().sort({ name: 1 }).toArray();
+    let ratings: ReturnType<typeof ratingsFor>;
+    try {
+      ratings = ratingsFor(
+        await ask<Pick<Answer, "ratings">>(ratingsPrompt(title, author, source, aspects), RATINGS_SCHEMA),
+        aspects,
+      );
+    } catch (error) {
+      console.warn(`Rerating ${title} failed:`, (error as Error).message);
+    }
+    if (!ratings) throw new DraftFailed("The agent couldn't rate every aspect.");
+    await this.c.ratings.deleteMany({ draft: d._id });
+    await this.c.ratings.insertMany(
+      ratings.map(({ aspect, value }) => ({ _id: crypto.randomUUID(), draft: d._id, aspect, value })),
+    );
+    return { draft: d._id };
+  }
+
+  async removeAspect({ name }: { name: string }) {
+    const aspect = await this.c.aspects.findOne({ name });
+    if (!aspect) throw new NoSuchAspect("There is no aspect with that name.");
+    await this.c.ratings.deleteMany({ aspect: aspect._id });
+    await this.c.aspects.deleteOne({ _id: aspect._id });
+    return { name };
   }
 
   async discard({ item }: { item: string }) {

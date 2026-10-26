@@ -28,10 +28,12 @@ beforeEach(async () => {
 });
 
 describe("BookCataloging", () => {
-  test("principle: a described, scored book shows what it's about and how it scores", async () => {
+  test("principle: a described, scored book shows what it's about and where it sits on a scale", async () => {
     const { criterion } = await catalog.defineCriterion({
-      name: "social-commentary",
-      description: "How much it comments on society.",
+      name: "pace",
+      description: "How quickly the story moves.",
+      low: "slow burn",
+      high: "page-turner",
     });
     const { book } = await catalog.addBook(details(1, "Brave New World"));
     await catalog.addGenre({ book, genre: "science fiction" });
@@ -41,7 +43,7 @@ describe("BookCataloging", () => {
     expect(await catalog._described({})).toEqual([]);
 
     await catalog.describe({ book, summary: "A World State keeps everyone content.", setting: "London" });
-    await catalog.scoreBook({ book, criterion, value: 9 });
+    await catalog.scoreBook({ book, criterion, value: 5 });
 
     expect((await catalog._described({})).map((b) => b.title)).toEqual(["Brave New World"]);
     expect((await catalog._book({ book }))[0]).toMatchObject({
@@ -53,12 +55,12 @@ describe("BookCataloging", () => {
       { name: "Bernard Marx", role: "MAIN", minAge: 25, maxAge: 40 },
     ]);
     expect(await catalog._scores({ book })).toEqual([
-      { criterion, criterionName: "social-commentary", value: 9 },
+      { criterion, criterionName: "pace", low: "slow burn", high: "page-turner", value: 5 },
     ]);
   });
 
   test("details can only be added while a book is pending, and scores only once described", async () => {
-    const { criterion } = await catalog.defineCriterion({ name: "pacing", description: "Speed." });
+    const { criterion } = await catalog.defineCriterion({ name: "pacing", description: "Speed.", low: "less", high: "more" });
     const { book } = await catalog.addBook(details(2, "The Hobbit"));
     await expect(catalog.scoreBook({ book, criterion, value: 5 })).rejects.toThrow(BookNotDescribed);
     await catalog.describe({ book, summary: "A hobbit's journey." });
@@ -71,8 +73,8 @@ describe("BookCataloging", () => {
   });
 
   test("refuses duplicates and invalid values", async () => {
-    await catalog.defineCriterion({ name: "pacing", description: "Speed." });
-    await expect(catalog.defineCriterion({ name: "pacing", description: "Again." })).rejects.toThrow(
+    await catalog.defineCriterion({ name: "pacing", description: "Speed.", low: "less", high: "more" });
+    await expect(catalog.defineCriterion({ name: "pacing", description: "Again.", low: "less", high: "more" })).rejects.toThrow(
       CriterionExists,
     );
     const { book } = await catalog.addBook(details(3, "Dune"));
@@ -91,7 +93,7 @@ describe("BookCataloging", () => {
   });
 
   test("resetting a description sends a book back to pending without its details", async () => {
-    const { criterion } = await catalog.defineCriterion({ name: "pacing", description: "Speed." });
+    const { criterion } = await catalog.defineCriterion({ name: "pacing", description: "Speed.", low: "less", high: "more" });
     const { book } = await catalog.addBook(details(4, "Station Eleven"));
     await catalog.addTheme({ book, theme: "art" });
     await catalog.describe({ book, summary: "After the flu." });
@@ -102,9 +104,28 @@ describe("BookCataloging", () => {
     expect(await catalog._themes({ book })).toEqual([]);
   });
 
+  test("removing a criterion removes its scores too", async () => {
+    const { criterion } = await catalog.defineCriterion({
+      name: "pace",
+      description: "How fast it moves.",
+      low: "slow burn",
+      high: "page-turner",
+    });
+    const { book } = await catalog.addBook(details(5, "Dune"));
+    await catalog.describe({ book, summary: "Spice." });
+    await catalog.scoreBook({ book, criterion, value: 4 });
+    expect(await catalog._scores({ book })).toEqual([
+      { criterion, criterionName: "pace", low: "slow burn", high: "page-turner", value: 4 },
+    ]);
+    expect(await catalog.removeCriterion({ criterion })).toEqual({ name: "pace" });
+    expect(await catalog._scores({ book })).toEqual([]);
+    expect(await catalog._criteria({})).toEqual([]);
+    await expect(catalog.removeCriterion({ criterion })).rejects.toThrow(NoSuchCriterion);
+  });
+
   test("lists every criterion by name", async () => {
-    await catalog.defineCriterion({ name: "whimsy", description: "Playfulness." });
-    await catalog.defineCriterion({ name: "pacing", description: "Speed." });
+    await catalog.defineCriterion({ name: "whimsy", description: "Playfulness.", low: "less", high: "more" });
+    await catalog.defineCriterion({ name: "pacing", description: "Speed.", low: "less", high: "more" });
     expect((await catalog._criteria({})).map((c) => c.name)).toEqual(["pacing", "whimsy"]);
   });
 });
