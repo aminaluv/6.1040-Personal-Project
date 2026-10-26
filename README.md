@@ -4,7 +4,7 @@
 Novelty is a book discovery app that helps readers or non-readers find their next read using spoiler-free First Impression cards, which show each book's summary, character, themes and tones, and how closely the book matches what the reader likes. Readers can swipe right to save a book to the Up Next shelf or left to pass on a book; every swipe sharpens the recommendations.
 
 ## P4 Complete Code
-Link to Novelty: 
+Link to Novelty: https://novelty.mit-sdg.dev/
 
 [Final Demo Video](https://drive.google.com/file/d/1aaQcFe6PjZgbM7pMkZlYRnW2UwvrumbB/view?usp=sharing)
 
